@@ -9,15 +9,14 @@ public class Spaces {
 		SpaceRepository repo = new SpaceRepository();
 		SequentialSpace client1 = new SequentialSpace();
 		repo.add("client1", client1);
-		repo.addGate("tcp://25.56.25.201:9001/?keep");
+		repo.addGate("tcp://25.65.87.75:9001/?keep");
 		
 		SequentialSpace server = new SequentialSpace();
 		repo.add("server", server);
 		
 		System.out.println("Created spaces");
 		
-		new Thread(new Server()).start();
-		new Thread(new Client("username")).start();
+		//new Thread(new Server()).start();
 		
 	}
 
