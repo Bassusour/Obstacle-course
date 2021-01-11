@@ -6,11 +6,18 @@ import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.ShapeRenderer;
 
 public class Client extends BasicGame {
+	
+	private Rectangle rec = null;
+	private int c;
 	
 	public Client(String title) {
 		super(title);
@@ -23,7 +30,7 @@ public class Client extends BasicGame {
             AppGameContainer app = new AppGameContainer(new Client("Game"));
             // app.setDisplayMode(screenSize.width, screenSize.height, true); => Full screen
             app.setDisplayMode(640, 480, false);
-            app.setShowFPS(true); // true for display the numbers of FPS
+            app.setShowFPS(false);// true for display the numbers of FPS
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
         }
@@ -48,19 +55,43 @@ public class Client extends BasicGame {
 
 	@Override
 	public void render(GameContainer container, Graphics graphics) throws SlickException {
-		graphics.drawString("Hello World", 50, 60);
+		graphics.setColor(Color.cyan);
+		graphics.drawString(Integer.toString(c), 10, 20);
+//		graphics.setBackground(Color.white);
+		graphics.fill(rec);
+		
 		
 	}
 
 	@Override
 	public void init(GameContainer arg0) throws SlickException {
-		// TODO Auto-generated method stub
+		rec = new Rectangle(100,300,25,25);
+		c = 0;
 		
 	}
 
 	@Override
-	public void update(GameContainer arg0, int arg1) throws SlickException {
-		// TODO Auto-generated method stub
+	public void update(GameContainer con, int arg1) throws SlickException {
+		Input input = con.getInput();
+		if(input.isKeyDown(Input.KEY_W)) {
+			c++;
+			rec.setY(rec.getY()-3);
+		}
+		
+		if(input.isKeyDown(Input.KEY_S)) {
+			c++;
+			rec.setY(rec.getY()+3);
+		}
+		
+		if(input.isKeyDown(Input.KEY_A)) {
+			c++;
+			rec.setX(rec.getX()-3);
+		}
+		
+		if(input.isKeyDown(Input.KEY_D)) {
+			c++;
+			rec.setX(rec.getX()+3);
+		}
 		
 	}
 	
