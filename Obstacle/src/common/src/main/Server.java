@@ -4,10 +4,9 @@ import java.io.IOException;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 
-class Server implements Runnable {
+class Server {
 	
-    @Override
-    public void run() {
+    public static void main(String[] args) {
     	try {
 			RemoteSpace server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 			RemoteSpace client1 = new RemoteSpace("tcp://25.56.25.201:9001/client1?keep");
