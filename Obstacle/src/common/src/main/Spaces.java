@@ -19,9 +19,6 @@ public class Spaces {
 		Object[] input = server.get(new FormalField(String.class));
 		System.out.println(input[0]);
 		
-		// new Thread(new Server()).start();
-		// new Thread(new Client("username")).start();
-		
 	}
 
 }
