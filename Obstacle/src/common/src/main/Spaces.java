@@ -1,23 +1,26 @@
 package common.src.main;
 
+import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 
 public class Spaces {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		SpaceRepository repo = new SpaceRepository();
 		SequentialSpace client1 = new SequentialSpace();
 		repo.add("client1", client1);
-		repo.addGate("tcp://25.56.25.201:9001/?keep");
+		repo.addGate("tcp://25.65.87.75:9001/?keep");
 		
 		SequentialSpace server = new SequentialSpace();
 		repo.add("server", server);
 		
 		System.out.println("Created spaces");
+		Object[] input = server.get(new FormalField(String.class));
+		System.out.println(input[0]);
 		
-		new Thread(new Server()).start();
-		new Thread(new Client("username")).start();
+		// new Thread(new Server()).start();
+		// new Thread(new Client("username")).start();
 		
 	}
 
