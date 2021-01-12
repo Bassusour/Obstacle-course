@@ -72,7 +72,7 @@ class PlayerCountChecker implements Runnable {
     		server = new RemoteSpace("tcp://"+ip+"/server?keep");
     		player1 = new RemoteSpace("tcp://"+ip+"/player1?keep");
     		player2 = new RemoteSpace("tcp://"+ip+"/player2?keep");
-    		player3 = new RemoteSpace("tcp://"+ip+"/player3?keep");
+    		//player3 = new RemoteSpace("tcp://"+ip+"/player3?keep");
     	} catch (IOException e) { } 
     	
 		
