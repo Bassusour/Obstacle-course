@@ -26,13 +26,13 @@ public class Game extends BasicGameState {
 	private int c;
 	private String mainPlayer;
 	private Client client;
-	private boolean go = true; //false if multiplayer
+	private boolean go = false; //false if multiplayer
 	private static int playerCount = 0;
 	public static final int ID = 1;
 	Image background;
 
-	public Game(int playerCount) {
-		//this.inbox = inbox;
+	public Game(int playerCount, RemoteSpace inbox) {
+		this.inbox = inbox;
 		this.playerCount = playerCount;
 	}
 
@@ -47,10 +47,9 @@ public class Game extends BasicGameState {
 	@Override
 	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
 		try {
-			System.out.println("init");
 			System.out.println(playerCount);
 			mainPlayer = "player"+playerCount;
-			inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
+			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
 			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
 			
 		} catch (IOException e) { } 
@@ -101,9 +100,7 @@ public class Game extends BasicGameState {
 	}
 		
 		public void updatePosition() throws InterruptedException  {
-			System.out.println("ran updatePos");
 			server.put(rec.getX(), rec.getY(), mainPlayer);
-			System.out.println("Put to server");
 			if(inbox.queryp(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos")) != null) {
 				Object[] t = inbox.get(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos"));
 				if(t[2].equals("player1")) {
