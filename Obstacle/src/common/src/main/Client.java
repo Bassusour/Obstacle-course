@@ -13,11 +13,25 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.ShapeRenderer;
+import org.newdawn.slick.state.StateBasedGame;
 
-public class Client extends BasicGame {
+public class Client extends StateBasedGame {
 	
-	private Rectangle rec = null;
-	private int c;
+	// Game state ids
+	public static final int MAINMENU = 0;
+	public static final int GAME = 1;
+	public static final int PAUSE = 2;
+	public static final int FIND_MATCH = 3;
+	public static final int CREATE_MATCH = 4;
+	
+	// App properties
+	public static final int WIDTH = 640;
+	public static final int HEIGHT = 480;
+	public static final int FRAMES = 60;
+	public static final double VERSION = 6.9;
+	
+	
+	
 	
 	public Client(String title) {
 		super(title);
@@ -27,9 +41,9 @@ public class Client extends BasicGame {
 		//System.setProperty("org.lwjgl.librarypath", new File(new File(System.getProperty("user.dir"), "native"), LWJGLUtil.getPlatformName()).getAbsolutePath());
 		try
         {
-            AppGameContainer app = new AppGameContainer(new Client("Game"));
+            AppGameContainer app = new AppGameContainer(new Client("Obstacle Course " + VERSION));
             // app.setDisplayMode(screenSize.width, screenSize.height, true); => Full screen
-            app.setDisplayMode(640, 480, false);
+            app.setDisplayMode(1920, 1080, true);
             app.setShowFPS(false);// true for display the numbers of FPS
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
@@ -53,45 +67,15 @@ public class Client extends BasicGame {
 		
 	}
 
-	@Override
-	public void render(GameContainer container, Graphics graphics) throws SlickException {
-		graphics.setColor(Color.cyan);
-		graphics.drawString(Integer.toString(c), 10, 20);
-//		graphics.setBackground(Color.white);
-		graphics.fill(rec);
-		
-		
-	}
+	
 
 	@Override
-	public void init(GameContainer arg0) throws SlickException {
-		rec = new Rectangle(100,300,25,25);
-		c = 0;
-		
-	}
-
-	@Override
-	public void update(GameContainer con, int arg1) throws SlickException {
-		Input input = con.getInput();
-		if(input.isKeyDown(Input.KEY_W)) {
-			c++;
-			rec.setY(rec.getY()-3);
-		}
-		
-		if(input.isKeyDown(Input.KEY_S)) {
-			c++;
-			rec.setY(rec.getY()+3);
-		}
-		
-		if(input.isKeyDown(Input.KEY_A)) {
-			c++;
-			rec.setX(rec.getX()-3);
-		}
-		
-		if(input.isKeyDown(Input.KEY_D)) {
-			c++;
-			rec.setX(rec.getX()+3);
-		}
+	public void initStatesList(GameContainer arg0) throws SlickException {
+		this.addState(new MainMenu());
+		this.addState(new Game());
+		this.addState(new Pause());
+		this.addState(new FindMatch());
+		this.addState(new CreateMatch());
 		
 	}
 	
