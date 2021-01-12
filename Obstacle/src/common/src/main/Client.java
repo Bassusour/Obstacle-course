@@ -1,7 +1,11 @@
 package common.src.main;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
+import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.newdawn.slick.AppGameContainer;
@@ -13,160 +17,67 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.ShapeRenderer;
+import org.newdawn.slick.state.StateBasedGame;
 
-public class Client extends BasicGame {
+public class Client extends StateBasedGame {
 	
-	private boolean collision = false;
+	private static RemoteSpace inbox;
+	private static RemoteSpace server;
+	private String mainPlayer;
+	private static int playerCount = 0;
+	static Client client;
 	
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
+
+	// Game state ids
+	public static final int MAINMENU = 0;
+	public static final int GAME = 1;
+	public static final int PAUSE = 2;
+	public static final int FIND_MATCH = 3;
+	public static final int CREATE_MATCH = 4;
 	
-	private Player player;
-	private Path path;
-	private Room room;
+	// App properties
+	public static final int FRAMES = 60;
+	public static final double VERSION = 6.9;
+
 	
 	public Client(String title) {
 		super(title);
 	}
 	
-	@Override
-	public void init(GameContainer arg0) throws SlickException {		
-		player = new Player(25, false);
-		path = new Path(Path.PATH_ONE_HORIZONTAL, Path.PATH_ONE_VERTICAL);
-		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS);	
-	}
-	
-	@Override
-	public void render(GameContainer container, Graphics graphics) throws SlickException {
-		
-		graphics.setColor(Color.white);
-		graphics.drawString("Collision: " + collision, 1700, 50);
-		graphics.drawString("Player X: " + player.getX(), 1700, 70);
-		graphics.drawString("Player Y: " + player.getY(), 1700, 90);
-		
-		
-		graphics.setColor(Color.orange);
-		
-		for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
-			graphics.fill(room.getTeleportElement(i));
-		}
-		
-		graphics.setColor(player.getColor());
-		graphics.fill(player.getShape());
-		
-		graphics.setColor(Color.white);
-		
-		for (int i = 0; i < path.getHorizontal().length; i++) {
-			graphics.fill(path.getHorizontalElement(i));
-		}
-		
-		for (int i = 0; i < path.getVertical().length; i++) {
-			graphics.fill(path.getVerticalElement(i));
-		}
-	}
-	
-	@Override
-	public void update(GameContainer container, int arg1) throws SlickException {
-		
-		Input input = container.getInput();
-	
-        if(input.isKeyPressed(Input.KEY_ESCAPE)) {
-            container.exit();
-        }
-		
-		if (input.isKeyDown(Input.KEY_W)) {
-			player.setY(player.getY() - 5);
-		}
-		
-		if (input.isKeyDown(Input.KEY_S)) {
-			player.setY(player.getY() + 5);
-		}
-		
-		if (input.isKeyDown(Input.KEY_A)) {
-			player.setX(player.getX() - 5);
-		}
-		
-		if (input.isKeyDown(Input.KEY_D)) {
-			player.setX(player.getX() + 5);
-		}
-		
-		for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
-			Teleporter teleporter = Teleporter.PATH_ONE_TELEPORTERS[i];
-			if (player.getShape().intersects(teleporter.getShape())) {
-				if (input.isKeyPressed(Input.KEY_E)) {
-					if (i % 2 == 0) {
-						player.setX(Teleporter.PATH_ONE_TELEPORTERS[i+1].getX() - player.getSize() / 2);
-						player.setY(Teleporter.PATH_ONE_TELEPORTERS[i+1].getY() - player.getSize() / 2);
-					} else {
-						player.setX(Teleporter.PATH_ONE_TELEPORTERS[i-1].getX() - player.getSize() / 2);
-						player.setY(Teleporter.PATH_ONE_TELEPORTERS[i-1].getY() - player.getSize() / 2);
-					}
-				}
-			}
-		}
-		
-		if (player.getX() < 0) { player.setX(0); }
-		if (player.getX() >= WIDTH - player.getSize()) { player.setX(WIDTH - player.getSize()); }
-		
-		if (player.getY() < 0) { player.setY(0); }
-		if (player.getY() >= HEIGHT - player.getSize()) { player.setY(HEIGHT - player.getSize()); }
-		
-		for (int i = 0; i < path.getHorizontal().length; i++) {
-			// South bound
-			if (i < 3) {
-				if (player.getShape().intersects(path.getHorizontalElement(i))) {
-					if(player.isEnemy()) {
-						player.setY(player.getY() + 5);
-					} else {
-						player.setY(player.getY() - 5);
-					}
-				}
-			// North bound
-			} else {
-				if (player.getShape().intersects(path.getHorizontalElement(i))) {
-					if(player.isEnemy()) {
-						player.setY(player.getY() - 5);
-					} else {
-						player.setY(player.getY() + 5);
-					}
-				}
-			}	
-		}
-		
-		for (int i = 0; i < path.getVertical().length; i++) {
-			// West bound
-			if (i < 3) {
-				if (player.getShape().intersects(path.getVerticalElement(i))) {
-					if(player.isEnemy()) {
-						player.setX(player.getX() - 5);
-					} else {
-						player.setX(player.getX() + 5);
-					}
-				}
-			// East bound
-			} else {
-				if (player.getShape().intersects(path.getVerticalElement(i))) {
-					if(player.isEnemy()) {
-						player.setX(player.getX() + 5);
-					} else {
-						player.setX(player.getX() - 5);
-					}
-				}
-			}
-		}
-	}
-	
 	public static void main(String[] args) {
-		try
-        {
-            AppGameContainer app = new AppGameContainer(new Client("Game"));
+
+		try {
+
+			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println("Enter ip address or \"localhost\"");
+			String ip = reader.readLine();
+			
+			if (ip.equals("localhost")) {
+				ip = "127.0.0.1";
+			}
+			
+			System.out.println("Enter port number");
+			String port = reader.readLine();
+			
+			server.put("getPlayerCount");
+			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
+			
+			inbox = new RemoteSpace("tcp://"+ip+":"+port+"/player" + playerCount + "?keep");
+            System.out.println(playerCount);
+            
+            System.out.println("Sucessfully setup");
+            
+            AppGameContainer app = new AppGameContainer(new Client("Title"));
             app.setDisplayMode(WIDTH, HEIGHT, true);
             app.setShowFPS(false);// true for display the numbers of FPS
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
-        }
-        catch (SlickException e)
-        {
+			
+			
+        } catch (SlickException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
 		
@@ -178,6 +89,14 @@ public class Client extends BasicGame {
 			server.put("test from client");
 			
 		} catch (IOException | InterruptedException e) { }
-		
 	}
+
+	public void initStatesList(GameContainer arg0) throws SlickException {
+		this.addState(new MainMenu());
+		this.addState(new Game(playerCount));
+		this.addState(new Pause());
+		this.addState(new FindMatch());
+		this.addState(new CreateMatch());
+	}
+
 }
