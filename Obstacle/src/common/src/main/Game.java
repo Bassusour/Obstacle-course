@@ -58,8 +58,8 @@ public class Game extends BasicGameState {
 			System.out.println(playerCount);
 			mainPlayer = "player"+playerCount;
 			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
-			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
-			players = new RemoteSpace("tcp://127.0.0.1:9001/players?keep");
+			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
+			players = new RemoteSpace("tcp://25.56.25.201:9001/players?keep");
 			
 			createPlayer();
 			

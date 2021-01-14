@@ -19,7 +19,7 @@ class Server {
     public static void main(String[] args) {
     	try {
     		SpaceRepository repo = new SpaceRepository();
-    		repo.addGate("tcp://127.0.0.1:9001/?keep");
+    		repo.addGate("tcp://25.56.25.201:9001/?keep");
     		
     		SequentialSpace players = new SequentialSpace();
     		repo.add("players", players);  		
@@ -41,8 +41,8 @@ class Server {
     		repo.add("player6", player6);
 ;
     		
-    		new Thread(new PlayerCountChecker("127.0.0.1:9001")).start();
-    		new Thread(new PlayerRoles("127.0.0.1:9001")).start();
+    		new Thread(new PlayerCountChecker("25.56.25.201:9001")).start();
+    		new Thread(new PlayerRoles("25.56.25.201:9001")).start();
     		
     		SequentialSpace[] arrPlayersSpaces = {player1, player2, player3, player4, player5, player6};
     		
