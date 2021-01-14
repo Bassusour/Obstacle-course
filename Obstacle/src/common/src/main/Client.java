@@ -29,11 +29,12 @@ public class Client extends StateBasedGame {
 	final static int HEIGHT = 1080;
 
 	// Game state ids
-	public static final int MAINMENU = 0;
+	public static final int MAIN_MENU = 0;
 	public static final int GAME = 1;
 	public static final int PAUSE = 2;
 	public static final int FIND_MATCH = 3;
 	public static final int CREATE_MATCH = 4;
+	public static final int LOBBY = 5;
 	
 	// App properties
 	public static final int FRAMES = 60;
@@ -48,13 +49,13 @@ public class Client extends StateBasedGame {
 
 		try {
 
-			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
+			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			System.out.println("Enter ip address or \"localhost\"");
 			String ip = reader.readLine();
 			
 			if (ip.equals("localhost")) {
-				ip = "127.0.0.1";
+				ip = "25.56.25.201";
 			}
 			
 			System.out.println("Enter port number");
@@ -79,8 +80,8 @@ public class Client extends StateBasedGame {
         }
 		
 		try {
-			RemoteSpace inbox = new RemoteSpace("tcp://25.65.87.75:9001/client1?keep");
-			RemoteSpace server = new RemoteSpace("tcp://25.65.87.75:9001/server?keep");
+			RemoteSpace inbox = new RemoteSpace("tcp://25.56.25.201:9001/client1?keep");
+			RemoteSpace server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 			
 			System.out.println("Connected from client");
 			server.put("test from client");

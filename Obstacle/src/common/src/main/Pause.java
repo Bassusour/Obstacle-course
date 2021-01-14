@@ -8,6 +8,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -22,6 +23,8 @@ public class Pause extends BasicGameState {
 	Image mainMenuButton;
 	Image desktopButton;
 	
+	Sound buttonClick;
+	
 	Input input;
 
 	public String mouse;
@@ -33,7 +36,7 @@ public class Pause extends BasicGameState {
 		optionsButton = new Image("res/optionsButton.png");
 		mainMenuButton = new Image("res/mainMenuButton.png");
 		desktopButton = new Image("res/desktopButton.png");
-		mouse = "nothing here";
+		buttonClick = new Sound("res/buttonClickSound.wav");
 	}
 
 	@Override
@@ -45,13 +48,11 @@ public class Pause extends BasicGameState {
 		g.drawImage(optionsButton, (windowWidth/2)-(optionsButton.getWidth()/2), 500);
 		g.drawImage(mainMenuButton, (windowWidth/2)-(mainMenuButton.getWidth()/2), 600);
 		g.drawImage(desktopButton, (windowWidth/2)-(desktopButton.getWidth()/2), 700);
-		g.drawString(mouse, 20, 20);
 		
 		g.setColor(Color.white);
 		
 		TrueTypeFont font = new TrueTypeFont(new Font("Trebuchet", Font.BOLD, 50), true);
 		int width = font.getWidth(pauseTitle);
-		int height = font.getWidth(pauseTitle);
 		font.drawString( (windowWidth/2)-(width/2), 200,  pauseTitle);
 		
 	}
@@ -74,16 +75,14 @@ public class Pause extends BasicGameState {
 		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 			sbg.enterState(1);
-		}
-		
-		mouse = "x: " + input.getMouseX() + " y: " + input.getMouseY();		
-		
+		}		
 	}
 	
 	private void resumeClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(resumeGameButton.getWidth()/2) && posX <= (windowWidth/2)-(resumeGameButton.getWidth()/2) + resumeGameButton.getWidth()) && (posY >= 400 && posY <= 400 + resumeGameButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-				sbg.enterState(1);
+				buttonClick.play();
+				sbg.enterState(Client.GAME);
 			}
 		}
 	}
@@ -91,7 +90,8 @@ public class Pause extends BasicGameState {
 	private void optionsClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(optionsButton.getWidth()/2) && posX <= (windowWidth/2)-(optionsButton.getWidth()/2) + optionsButton.getWidth()) && (posY >= 500 && posY <= 500 + optionsButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-				sbg.enterState(0);
+				buttonClick.play();
+				sbg.enterState(Client.MAIN_MENU);
 			}
 		}
 	}
@@ -99,7 +99,8 @@ public class Pause extends BasicGameState {
 	private void mainMenuClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(mainMenuButton.getWidth()/2) && posX <= (windowWidth/2)-(mainMenuButton.getWidth()/2) + mainMenuButton.getWidth()) && (posY >= 600 && posY <= 600 + mainMenuButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-				sbg.enterState(0);
+				buttonClick.play();
+				sbg.enterState(Client.MAIN_MENU);
 			}
 		}
 	}
@@ -107,6 +108,7 @@ public class Pause extends BasicGameState {
 	private void desktopClick(int posX, int posY, GameContainer gc) {
 		if((posX >= (windowWidth/2)-(desktopButton.getWidth()/2) && posX <= (windowWidth/2)-(desktopButton.getWidth()/2) + desktopButton.getWidth()) && (posY >= 700 && posY <= 700 + desktopButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+				buttonClick.play();
 				gc.exit();
 			}
 		}

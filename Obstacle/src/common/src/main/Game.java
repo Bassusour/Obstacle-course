@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
@@ -22,12 +23,15 @@ public class Game extends BasicGameState {
 	
 	private RemoteSpace inbox;
 	private RemoteSpace server;
-	private Rectangle rec = null;
-	private Rectangle rec2 = null;
-	private int c;
+
+	private RemoteSpace players;
+	private List<Object[]> allPlayers;
+	private boolean createPlayers = false;
+
 	private String mainPlayer;
+	private Player[] playersArr = new Player[10];
 	private Client client;
-	private boolean go = true; //false if multiplayer
+	private boolean go = false; //false if multiplayer
 	private static int playerCount = 0;
 	public static final int ID = 1;
 	Image background;
@@ -35,9 +39,11 @@ public class Game extends BasicGameState {
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
 	
-	private Player player1, player2;
+	private Player player;
 	private Path path;
 	private Room room;
+	
+	String username = MainMenu.username;
 	
 	private boolean collision = false;
 
@@ -52,37 +58,26 @@ public class Game extends BasicGameState {
 			System.out.println(playerCount);
 			mainPlayer = "player"+playerCount;
 			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
-			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
+			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
+			players = new RemoteSpace("tcp://25.56.25.201:9001/players?keep");
 			
-		} catch (IOException e) { } 
-		//rec = new Rectangle(100,300,25,25);
-		//rec2 = new Rectangle(300,300,25,25);
-		
-		player1 = new Player(25, true);
-		player2 = new Player(25, true);
+			createPlayer();
+			
+		} catch (IOException | InterruptedException e) { }
 		path = new Path(Path.PATH_ONE_HORIZONTAL, Path.PATH_ONE_VERTICAL);
-		room = new Room(player1, path, Teleporter.PATH_ONE_TELEPORTERS);
+		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS);
 		
 	}
-	
+
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg,  Graphics graphics) throws SlickException {
 		
-		/*
-		graphics.setColor(Color.white);
-		graphics.drawString("Collision: " + collision, 1700, 50);
-		graphics.drawString("Player X: " + player1.getX(), 1700, 70);
-		graphics.drawString("Player Y: " + player1.getY(), 1700, 90);
-		*/
-		
-		/*
-		graphics.setColor(Color.lightGray);
-		graphics.fill(new Rectangle(0, 0, 500, 100));
-		graphics.fill(new Rectangle(400, 100, 100, 100));
-		graphics.fill(new Rectangle(0, 200, 500, 100));
-		graphics.fill(new Rectangle(0, 300, 100, 100));
-		graphics.fill(new Rectangle(0, 400, 600, 100));
-		*/
+		if(createPlayers) {
+			for (int i = 0; i < allPlayers.size(); i++) {
+				graphics.setColor(playersArr[i+1].getColor());
+				graphics.fill(playersArr[i+1].getShape());
+			}
+		}
 		
 		graphics.setBackground(Color.decode("#F7DFD3"));
 		
@@ -116,11 +111,13 @@ public class Game extends BasicGameState {
 			graphics.fill(room.getTeleportElement(i));
 		}
 		
-		graphics.setColor(player1.getColor());
-		graphics.fill(player1.getShape());
+
+		graphics.drawString(MainMenu.username, (player.getX() + player.getSize()/2) - (container.getDefaultFont().getWidth(MainMenu.username)/2), player.getY()-20);
+		graphics.setColor(player.getColor());
+		graphics.fill(player.getShape());
+
 		
-		//graphics.setColor(player2.getColor());
-		//graphics.fill(player2.getShape());
+
 		
 		graphics.setColor(Color.white);
 		
@@ -138,6 +135,8 @@ public class Game extends BasicGameState {
 	public void update(GameContainer con, StateBasedGame sbg,  int arg1) throws SlickException {
 		Input input = con.getInput();
 		
+		
+		
 		if(go) { //Waits for all clients to synchronize
 			
 			try {
@@ -145,59 +144,59 @@ public class Game extends BasicGameState {
 			} catch (InterruptedException e) { }
 			
 			if (input.isKeyDown(Input.KEY_W)) {
-				player1.setY(player1.getY() - 5);
+				player.setY(player.getY() - 5);
 			}
 			
 			if (input.isKeyDown(Input.KEY_S)) {
-				player1.setY(player1.getY() + 5);
+				player.setY(player.getY() + 5);
 			}
 			
 			if (input.isKeyDown(Input.KEY_A)) {
-				player1.setX(player1.getX() - 5);
+				player.setX(player.getX() - 5);
 			}
 			
 			if (input.isKeyDown(Input.KEY_D)) {
-				player1.setX(player1.getX() + 5);
+				player.setX(player.getX() + 5);
 			}
 			
 			for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
 				Teleporter teleporter = Teleporter.PATH_ONE_TELEPORTERS[i];
-				if (player1.getShape().intersects(teleporter.getShape())) {
+				if (player.getShape().intersects(teleporter.getShape())) {
 					if (input.isKeyPressed(Input.KEY_E)) {
 						if (i % 2 == 0) {
-							player1.setX(Teleporter.PATH_ONE_TELEPORTERS[i+1].getX() - player1.getSize() / 2);
-							player1.setY(Teleporter.PATH_ONE_TELEPORTERS[i+1].getY() - player1.getSize() / 2);
+							player.setX(Teleporter.PATH_ONE_TELEPORTERS[i+1].getX() - player.getSize() / 2);
+							player.setY(Teleporter.PATH_ONE_TELEPORTERS[i+1].getY() - player.getSize() / 2);
 						} else {
-							player1.setX(Teleporter.PATH_ONE_TELEPORTERS[i-1].getX() - player1.getSize() / 2);
-							player1.setY(Teleporter.PATH_ONE_TELEPORTERS[i-1].getY() - player1.getSize() / 2);
+							player.setX(Teleporter.PATH_ONE_TELEPORTERS[i-1].getX() - player.getSize() / 2);
+							player.setY(Teleporter.PATH_ONE_TELEPORTERS[i-1].getY() - player.getSize() / 2);
 						}
 					}
 				}
 			}
 			
-			if (player1.getX() < 0) { player1.setX(0); }
-			if (player1.getX() >= WIDTH - player1.getSize()) { player1.setX(WIDTH - player1.getSize()); }
+			if (player.getX() < 0) { player.setX(0); }
+			if (player.getX() >= WIDTH - player.getSize()) { player.setX(WIDTH - player.getSize()); }
 			
-			if (player1.getY() < 0) { player1.setY(0); }
-			if (player1.getY() >= HEIGHT - player1.getSize()) { player1.setY(HEIGHT - player1.getSize()); }
+			if (player.getY() < 0) { player.setY(0); }
+			if (player.getY() >= HEIGHT - player.getSize()) { player.setY(HEIGHT - player.getSize()); }
 			
 			for (int i = 0; i < path.getHorizontal().length; i++) {
 				// South bound
 				if (i < 16) {
-					if (player1.getShape().intersects(path.getHorizontalElement(i))) {
-						if(player1.isEnemy()) {
-							player1.setY(player1.getY() + 5);
+					if (player.getShape().intersects(path.getHorizontalElement(i))) {
+						if(player.isEnemy()) {
+							player.setY(player.getY() + 5);
 						} else {
-							player1.setY(player1.getY() - 5);
+							player.setY(player.getY() - 5);
 						}
 					}
 				// North bound
 				} else {
-					if (player1.getShape().intersects(path.getHorizontalElement(i))) {
-						if(player1.isEnemy()) {
-							player1.setY(player1.getY() - 5);
+					if (player.getShape().intersects(path.getHorizontalElement(i))) {
+						if(player.isEnemy()) {
+							player.setY(player.getY() - 5);
 						} else {
-							player1.setY(player1.getY() + 5);
+							player.setY(player.getY() + 5);
 						}
 					}
 				}	
@@ -206,20 +205,20 @@ public class Game extends BasicGameState {
 			for (int i = 0; i < path.getVertical().length; i++) {
 				// West bound
 				if (i < 13) {
-					if (player1.getShape().intersects(path.getVerticalElement(i))) {
-						if(player1.isEnemy()) {
-							player1.setX(player1.getX() - 5);
+					if (player.getShape().intersects(path.getVerticalElement(i))) {
+						if(player.isEnemy()) {
+							player.setX(player.getX() - 5);
 						} else {
-							player1.setX(player1.getX() + 5);
+							player.setX(player.getX() + 5);
 						}
 					}
 				// East bound
 				} else {
-					if (player1.getShape().intersects(path.getVerticalElement(i))) {
-						if(player1.isEnemy()) {
-							player1.setX(player1.getX() + 5);
+					if (player.getShape().intersects(path.getVerticalElement(i))) {
+						if(player.isEnemy()) {
+							player.setX(player.getX() + 5);
 						} else {
-							player1.setX(player1.getX() - 5);
+							player.setX(player.getX() - 5);
 						}
 					}
 				}
@@ -227,34 +226,79 @@ public class Game extends BasicGameState {
 			
 		} else {
 			try {
-				server.put(true, mainPlayer + " ready");
+				server.put(mainPlayer, "ready", "changeReady");
+				System.out.println("waiting for go");
 				inbox.get(new ActualField ("go"));
+				System.out.println("got go");
+				getPlayers();
 				go = true;
+				createPlayers = true;
 			} catch (InterruptedException e) { }
 		
 		}
+		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
-			sbg.enterState(2);
+			sbg.enterState(Client.PAUSE);
 		}
+	}
+	
+	//"player1", "good guy", "not ready"
+	private void getPlayers() throws InterruptedException {
+		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+		
+		for (int i = 0; i < allPlayers.size(); i++) {
+			boolean role;
+			if(allPlayers.get(i)[1].equals("good guy")) {
+				role = false;
+			} else {
+				role = true;
+			}
+			
+			if(allPlayers.get(i)[0].equals(mainPlayer)) {
+				System.out.println("Skipped itself");
+				continue; //Should not create itself
+			} else {
+				playersArr[i+1] = new Player(25, role);
+				System.out.println("Created player"+(i+1));
+			}
+		}
+	}
+	private void createPlayer() throws InterruptedException {
+		if(Math.random() >= 0.5) {
+			server.put(mainPlayer, "bad guy", "not ready", "createPlayer");
+			player = new Player(25,true);
+			playersArr[playerCount] = player;
+		} else {
+			server.put(mainPlayer, "good guy", "not ready", "createPlayer");
+			player = new Player(25,false);
+			playersArr[playerCount] = player;
+		}
+		
+		
 	}
 
 	public void updatePosition() throws InterruptedException  {
-			server.put(player1.getX(), player1.getY(), mainPlayer);
+			server.put(player.getX(), player.getY(), mainPlayer);
+			//System.out.println("Sent coordinates to server from " + mainPlayer);
 			if(inbox.queryp(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos")) != null) {
 				Object[] t = inbox.get(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos"));
+				//Can never get position of itself from server
 				if(t[2].equals("player1")) {
-					player2.setX((float) t[0]);
-					player2.setY((float) t[1]);
+					playersArr[1].setX((float) t[0]);
+					playersArr[1].setY((float) t[1]);
 				} else if(t[2].equals("player2")) {
-					player2.setX((float) t[0]);
-					player2.setY((float) t[1]);
+					playersArr[2].setX((float) t[0]);
+					playersArr[2].setY((float) t[1]);
 				} else if(t[2].equals("player3")) {
-					//rec3.setX((float) t[0]);
-					//rec3.setY((float) t[1]);
-					//osv
+					playersArr[3].setX((float) t[0]);
+					playersArr[3].setY((float) t[1]);
+				} else if(t[2].equals("player4")) {
+					playersArr[4].setX((float) t[0]);
+					playersArr[4].setY((float) t[1]);
 				}
 			}
 		}
+	
 
 	@Override
 	public int getID() {
