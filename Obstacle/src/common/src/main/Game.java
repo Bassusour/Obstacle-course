@@ -41,18 +41,17 @@ public class Game extends BasicGameState {
 	
 	private boolean collision = false;
 
-	public Game(int playerCount) {
-		//this.inbox = inbox;
+	public Game(int playerCount, RemoteSpace inbox) {
+		this.inbox = inbox;
 		this.playerCount = playerCount;
 	}
 
 	@Override
 	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
 		try {
-			System.out.println("init");
 			System.out.println(playerCount);
 			mainPlayer = "player"+playerCount;
-			inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
+			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
 			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
 			
 		} catch (IOException e) { } 
@@ -238,7 +237,7 @@ public class Game extends BasicGameState {
 			sbg.enterState(2);
 		}
 	}
-		
+
 	public void updatePosition() throws InterruptedException  {
 			server.put(player1.getX(), player1.getY(), mainPlayer);
 			if(inbox.queryp(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos")) != null) {

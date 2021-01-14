@@ -20,12 +20,10 @@ import org.newdawn.slick.geom.ShapeRenderer;
 import org.newdawn.slick.state.StateBasedGame;
 
 public class Client extends StateBasedGame {
-	
+	//Client-server
 	private static RemoteSpace inbox;
 	private static RemoteSpace server;
-	private String mainPlayer;
 	private static int playerCount = 0;
-	static Client client;
 	
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
@@ -66,7 +64,6 @@ public class Client extends StateBasedGame {
 			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
 			
 			inbox = new RemoteSpace("tcp://"+ip+":"+port+"/player" + playerCount + "?keep");
-            System.out.println(playerCount);
             
             System.out.println("Sucessfully setup");
             
@@ -93,7 +90,7 @@ public class Client extends StateBasedGame {
 
 	public void initStatesList(GameContainer arg0) throws SlickException {
 		this.addState(new MainMenu());
-		this.addState(new Game(playerCount));
+		this.addState(new Game(playerCount, inbox));
 		this.addState(new Pause());
 		this.addState(new FindMatch());
 		this.addState(new CreateMatch());
