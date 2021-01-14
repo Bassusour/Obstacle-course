@@ -75,7 +75,6 @@ public class Client extends StateBasedGame {
 
             app.setDisplayMode(WIDTH, HEIGHT, true);
             app.setShowFPS(true); // true for display the numbers of FPS
-
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
 			
