@@ -24,7 +24,6 @@ public class Game extends BasicGameState {
 	private RemoteSpace server;
 	private Rectangle rec = null;
 	private Rectangle rec2 = null;
-	private int c;
 	private String mainPlayer;
 	private Client client;
 	private boolean go = false; //false if multiplayer
@@ -38,6 +37,8 @@ public class Game extends BasicGameState {
 	private Player player1, player2;
 	private Path path;
 	private Room room;
+	
+	String username = MainMenu.username;
 	
 	private boolean collision = false;
 
@@ -84,8 +85,12 @@ public class Game extends BasicGameState {
 		graphics.setColor(player1.getColor());
 		graphics.fill(player1.getShape());
 		
+		graphics.drawString(MainMenu.username, (player1.getX() + player1.getSize()/2) - (container.getDefaultFont().getWidth(MainMenu.username)/2), player1.getY()-20);
+		
 		graphics.setColor(player2.getColor());
 		graphics.fill(player2.getShape());
+		
+
 		
 		graphics.setColor(Color.white);
 		
@@ -198,8 +203,9 @@ public class Game extends BasicGameState {
 			} catch (InterruptedException e) { }
 		
 		}
+		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
-			sbg.enterState(2);
+			sbg.enterState(Client.PAUSE);
 		}
 	}
 		
@@ -220,6 +226,7 @@ public class Game extends BasicGameState {
 				}
 			}
 		}
+	
 
 	@Override
 	public int getID() {

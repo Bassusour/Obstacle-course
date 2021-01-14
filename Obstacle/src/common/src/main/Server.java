@@ -22,6 +22,20 @@ class Server {
     		repo.add("player1", player1);
     		repo.addGate("tcp://127.0.0.1:9001/?keep");
     		
+    		SequentialSpace players = new SequentialSpace();
+    		repo.add("players", players);
+    		players.put("player1", "good", "Not Ready"); 
+    		players.put("player2", "good", "Ready"); 
+    		players.put("player3", "good", "Not Ready"); 
+    		players.put("player4", "good", "Ready");
+    		players.put("player5", "good", "Not Ready"); 
+//    		players.put("player6", "good", "Ready");
+//    		players.put("player7", "good", "Not Ready"); 
+//    		players.put("player8", "good", "Ready");
+//    		players.put("player9", "good", "Not Ready"); 
+//    		players.put("player0", "good", "Ready");
+    		
+    		
     		SequentialSpace server = new SequentialSpace();
     		repo.add("server", server);
     		
