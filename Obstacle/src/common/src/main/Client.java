@@ -49,12 +49,11 @@ public class Client extends StateBasedGame {
 	public static void main(String[] args) {
 
 		try {
-
-			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
+			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 //			System.out.println("Enter ip address or \"localhost\"");
 //			String ip = reader.readLine();
-			String ip = "127.0.0.1";
+			String ip = "25.56.25.201";
 			
 //			if (ip.equals("localhost")) {
 //				ip = "127.0.0.1";
@@ -71,9 +70,9 @@ public class Client extends StateBasedGame {
             
             System.out.println("Sucessfully setup");
             
-            AppGameContainer app = new AppGameContainer(new Client("Title"));
+            AppGameContainer app = new AppGameContainer(new Client("Title"+playerCount));
 
-            app.setDisplayMode(WIDTH, HEIGHT, true);
+            app.setDisplayMode(WIDTH, HEIGHT, false);
             app.setShowFPS(true); // true for display the numbers of FPS
 
             app.setVSync(true); // false for disable the FPS synchronize
