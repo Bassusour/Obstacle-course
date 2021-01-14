@@ -11,7 +11,7 @@ import org.jspace.Space;
 import org.jspace.SpaceRepository;
 
 class Server {
-	private static boolean sync = false; //false if multiplayer
+	private static boolean sync = true; //false if multiplayer
 	private int playerCount = 0;
 	
     public static void main(String[] args) {
