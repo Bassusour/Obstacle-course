@@ -65,8 +65,8 @@ public class Lobby extends BasicGameState {
 		buttonClick = new Sound("res/buttonClickSound.wav");
 		mainMenuButton = new Image("res/mainMenuButton.png");
 		try {
-			players = new RemoteSpace("tcp://127.0.0.1:9001/players?keep");
-			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
+			players = new RemoteSpace("tcp://25.56.25.201:9001/players?keep");
+			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 		} catch (IOException e) {}
 
 	}

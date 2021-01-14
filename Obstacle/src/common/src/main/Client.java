@@ -14,6 +14,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.ShapeRenderer;
@@ -51,15 +52,17 @@ public class Client extends StateBasedGame {
 
 			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-			System.out.println("Enter ip address or \"localhost\"");
-			String ip = reader.readLine();
+//			System.out.println("Enter ip address or \"localhost\"");
+//			String ip = reader.readLine();
+			String ip = "25.56.25.201";
 			
-			if (ip.equals("localhost")) {
-				ip = "25.56.25.201";
-			}
+//			if (ip.equals("localhost")) {
+//				ip = "127.0.0.1";
+//			}
 			
-			System.out.println("Enter port number");
-			String port = reader.readLine();
+//			System.out.println("Enter port number");
+//			String port = reader.readLine();
+			String port = "9001";
 			
 			server.put("getPlayerCount");
 			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
@@ -69,11 +72,12 @@ public class Client extends StateBasedGame {
             System.out.println("Sucessfully setup");
             
             AppGameContainer app = new AppGameContainer(new Client("Title"));
+
             app.setDisplayMode(WIDTH, HEIGHT, true);
-            app.setShowFPS(false);// true for display the numbers of FPS
+            app.setShowFPS(true); // true for display the numbers of FPS
+
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
-			
 			
         } catch (SlickException | IOException | InterruptedException e) {
             e.printStackTrace();
@@ -89,12 +93,14 @@ public class Client extends StateBasedGame {
 		} catch (IOException | InterruptedException e) { }
 	}
 
-	public void initStatesList(GameContainer arg0) throws SlickException {
+	public void initStatesList(GameContainer gc) throws SlickException {
 		this.addState(new MainMenu());
 		this.addState(new Game(playerCount, inbox));
 		this.addState(new Pause());
 		this.addState(new FindMatch());
 		this.addState(new CreateMatch());
+		this.addState(new Lobby(playerCount));
+
 	}
 
 }
