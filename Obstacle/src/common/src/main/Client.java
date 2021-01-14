@@ -68,11 +68,10 @@ public class Client extends StateBasedGame {
             System.out.println("Sucessfully setup");
             
             AppGameContainer app = new AppGameContainer(new Client("Title"));
-            app.setDisplayMode(WIDTH, HEIGHT, true);
+            app.setDisplayMode(800, 600, false);
             app.setShowFPS(false);// true for display the numbers of FPS
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
-			
 			
         } catch (SlickException | IOException | InterruptedException e) {
             e.printStackTrace();
