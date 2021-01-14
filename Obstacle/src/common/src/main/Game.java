@@ -60,9 +60,6 @@ public class Game extends BasicGameState {
 			createPlayer();
 			
 		} catch (IOException | InterruptedException e) { }
-		
-//		player1 = new Player(25, false);
-//		player2 = new Player(25, true);
 		path = new Path(Path.PATH_ONE_HORIZONTAL, Path.PATH_ONE_VERTICAL);
 		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS);
 		
@@ -85,20 +82,38 @@ public class Game extends BasicGameState {
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg,  Graphics graphics) throws SlickException {
 		
-		graphics.setColor(Color.white);
-		graphics.drawString("Collision: " + collision, 1700, 50);
-		graphics.drawString("Player X: " + player.getX(), 1700, 70);
-		graphics.drawString("Player Y: " + player.getY(), 1700, 90);
-		
-		
 		if(createPlayers) {
 			for (int i = 0; i < allPlayers.size(); i++) {
 				graphics.setColor(playersArr[i+1].getColor());
 				graphics.fill(playersArr[i+1].getShape());
 			}
 		}
-
 		
+		graphics.setBackground(Color.decode("#F7DFD3"));
+		
+		// PATH_ONE HORIZONTAL
+		graphics.setColor(Color.decode("#355C7D"));
+		graphics.fill(new Rectangle(0, 100, 400, 100));
+		graphics.fill(new Rectangle(100, 300, 400, 100));
+		graphics.fill(new Rectangle(0, 500, 600, 100));	
+		graphics.fill(new Rectangle(0, 700, 300, 100));	
+		graphics.fill(new Rectangle(400, 700, 700, 100));
+		graphics.fill(new Rectangle(0, 900, 1820, 100));
+		graphics.fill(new Rectangle(1400, 700, 420, 100));
+		graphics.fill(new Rectangle(900, 500, 920, 100));
+		graphics.fill(new Rectangle(1500, 300, 100, 100));
+		graphics.fill(new Rectangle(1500, 100, 420, 100));
+		
+		// PATH_ONE VERTICAL
+		graphics.fill(new Rectangle(500, 0, 100, 400));
+		graphics.fill(new Rectangle(700, 0, 100, 700));
+		graphics.fill(new Rectangle(900, 100, 100, 400));
+		graphics.fill(new Rectangle(1100, 0, 100, 400));
+		graphics.fill(new Rectangle(1300, 100, 100, 400));
+		graphics.fill(new Rectangle(1720, 200, 100, 200));
+		graphics.fill(new Rectangle(1720, 600, 100, 100));
+		graphics.fill(new Rectangle(1720, 800, 100, 100));
+		graphics.fill(new Rectangle(1200, 700, 100, 200));
 		
 		graphics.setColor(Color.orange);
 		
@@ -172,7 +187,7 @@ public class Game extends BasicGameState {
 			
 			for (int i = 0; i < path.getHorizontal().length; i++) {
 				// South bound
-				if (i < 3) {
+				if (i < 16) {
 					if (player.getShape().intersects(path.getHorizontalElement(i))) {
 						if(player.isEnemy()) {
 							player.setY(player.getY() + 5);
@@ -194,7 +209,7 @@ public class Game extends BasicGameState {
 			
 			for (int i = 0; i < path.getVertical().length; i++) {
 				// West bound
-				if (i < 3) {
+				if (i < 13) {
 					if (player.getShape().intersects(path.getVerticalElement(i))) {
 						if(player.isEnemy()) {
 							player.setX(player.getX() - 5);
@@ -219,8 +234,8 @@ public class Game extends BasicGameState {
 				server.put(mainPlayer, "ready", "changeReady");
 				inbox.get(new ActualField ("go"));
 				getPlayers();
-				createPlayers = true;
 				go = true;
+				createPlayers = true;
 			} catch (InterruptedException e) { }
 		
 		}

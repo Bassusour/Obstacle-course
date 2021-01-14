@@ -12,10 +12,10 @@ public class Player {
 	
 	public Player(int size, boolean isEnemy) {
 		if (isEnemy) {
-			this.color = Color.red;
+			this.color = Color.decode("#F67280");
 			this.shape = new Rectangle(30, 137, size, size);
 		} else {
-			this.color = Color.white;
+			this.color = Color.darkGray;
 			this.shape = new Rectangle(30, 37, size, size);
 		}
 		this.size = size;
