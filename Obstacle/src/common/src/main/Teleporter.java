@@ -14,7 +14,13 @@ public class Teleporter {
 			new Teleporter(15, 350, 150),
 			new Teleporter(15, 550, 30),
 			new Teleporter(15, 150, 350),
-			new Teleporter(15, 30, 550)
+			new Teleporter(15, 30, 550),
+			new Teleporter(15, 550, 550),
+			new Teleporter(15, 750, 30),
+			new Teleporter(15, 750, 750),
+			new Teleporter(15, 750, 950),
+			new Teleporter(15, 1770, 550),
+			new Teleporter(15, 1770, 350)
 	};
 	
 	public Teleporter(int size, int X, int Y) {

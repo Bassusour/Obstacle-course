@@ -23,6 +23,8 @@ public class Lobby extends BasicGameState {
 	
 	String host;
 	
+	RemoteSpace server;
+	
 	private int windowWidth;
 	private int windowHeight;
 	
@@ -42,9 +44,14 @@ public class Lobby extends BasicGameState {
 	RemoteSpace players;
 	
 	Rectangle playerBox;
+	private int playerCount;
 	
 	Image readyButton;
 	Image mainMenuButton;
+
+	public Lobby(int playerCount) {
+		this.playerCount = playerCount;
+	}
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
@@ -59,6 +66,7 @@ public class Lobby extends BasicGameState {
 		mainMenuButton = new Image("res/mainMenuButton.png");
 		try {
 			players = new RemoteSpace("tcp://127.0.0.1:9001/players?keep");
+			server = new RemoteSpace("tcp://127.0.0.1:9001/server?keep");
 		} catch (IOException e) {}
 
 	}
@@ -111,6 +119,9 @@ public class Lobby extends BasicGameState {
 	private void readyClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(readyButton.getWidth()) && posX <= (windowWidth/2) && (posY >= 900 && posY <= 900 + readyButton.getHeight()))) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+				try {
+					server.put("player"+playerCount, "ready", "changeReady");
+				} catch (InterruptedException e) {}
 				buttonClick.play();
 				sbg.enterState(Client.GAME);
 			}
