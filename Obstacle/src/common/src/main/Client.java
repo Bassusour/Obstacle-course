@@ -51,7 +51,6 @@ public class Client extends StateBasedGame {
 	public static void main(String[] args) {
 
 		try {
-
 			server = new RemoteSpace("tcp://" + IP + "/server?keep");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 //			System.out.println("Enter ip address or \"localhost\"");
@@ -71,7 +70,7 @@ public class Client extends StateBasedGame {
             
             System.out.println("Sucessfully setup");
             
-            AppGameContainer app = new AppGameContainer(new Client("Title"));
+            AppGameContainer app = new AppGameContainer(new Client("Title"+playerCount));
 
             app.setDisplayMode(WIDTH, HEIGHT, false);
             app.setShowFPS(true); // true for display the numbers of FPS

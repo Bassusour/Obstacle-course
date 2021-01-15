@@ -83,8 +83,8 @@ class Server {
 					//for(int i = 0; i < players.size(); i++)
 					if(notReadyPlayer != null) {
 						continue;
-					} else if(notReadyPlayer == null && players.size() >= 1) {
-						for(int i = 0; i <= players.size(); i++) {
+					} else if(notReadyPlayer == null && ready.size() >= 1) {
+						for(int i = 0; i < players.size(); i++) {
 							//sends go signal to all connected players
 							System.out.println("Size is " + players.size());
 							arrPlayersSpaces[i].put("go");
@@ -180,13 +180,14 @@ class PlayerRoles implements Runnable {
     				System.out.println("Changing ready");
     				Object[] input = server.get(new FormalField(String.class), new FormalField(String.class), new ActualField("changeReady"));
     				System.out.println("Got input");
-    				Object[] selectedPlayer = ready.get(new ActualField(input[0]), new FormalField(String.class));
-    				System.out.println("Got player");
+    				ready.get(new ActualField(input[0]), new FormalField(String.class));
+    				System.out.println("Removed old ready");
     				if(input[1].equals("ready")) {
     					ready.put(input[0], "ready");
     					System.out.println("Updated " + input[0] + " to ready");
     				} else if(input[1].equals("not ready")) {
     					ready.put(input[0], "not ready");
+    					System.out.println("Updated " + input[0] + " to not ready");
     				}
     			}
     			

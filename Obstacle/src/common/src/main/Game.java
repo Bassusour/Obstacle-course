@@ -56,7 +56,7 @@ public class Game extends BasicGameState {
 	@Override
 	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
 		try {
-			System.out.println(playerCount);
+			System.out.println(playerCount + "test");
 			mainPlayer = "player"+playerCount;
 			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
 
@@ -116,8 +116,8 @@ public class Game extends BasicGameState {
 		
 
 		graphics.drawString(MainMenu.username, (player.getX() + player.getSize()/2) - (container.getDefaultFont().getWidth(MainMenu.username)/2), player.getY()-20);
-		graphics.setColor(player.getColor());
-		graphics.fill(player.getShape());
+		//graphics.setColor(player.getColor());
+		//graphics.fill(player.getShape());
 
 		
 
@@ -133,9 +133,11 @@ public class Game extends BasicGameState {
 		}
 		
 		if(createPlayers) {
-			for (int i = 1; i <= allPlayers.size(); i++) {
-				graphics.setColor(playersArr[i].getColor());
-				graphics.fill(playersArr[i].getShape());	
+			System.out.println(playersArr[0] + ", " + playersArr[1] + ", " + playersArr[2] + ", " + playersArr[3]);
+			for (int i = 0; i < allPlayers.size(); i++) {
+				//System.out.println("null at player " + (i+1));
+				graphics.setColor(playersArr[i+1].getColor());
+				graphics.fill(playersArr[i+1].getShape());
 			}
 		}
 		
@@ -250,22 +252,29 @@ public class Game extends BasicGameState {
 	
 	//"player1", "good guy", "not ready"
 	private void getPlayers() throws InterruptedException {
-		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class));
 		
 		for (int i = 0; i < allPlayers.size(); i++) {
-			boolean role;
+			boolean role = true;
 			if(allPlayers.get(i)[1].equals("good guy")) {
 				role = false;
 			} else {
 				role = true;
 			}
 			
+			System.out.println(allPlayers.get(i)[0]);
+			
+			/*
+			 * "player1", "bad guy"
+			 * "player2", "bad guy"
+			 */
+			
 			if(allPlayers.get(i)[0].equals(mainPlayer)) {
-				System.out.println("Skipped itself");
+				System.out.println("Skipped itself as " + mainPlayer);
 				continue; //Should not create itself
 			} else {
-				playersArr[allPlayers.size()-i] = new Player(25, role);
-				System.out.println("Created player"+(allPlayers.size()-i));
+				playersArr[i+1] = new Player(25, role);
+				System.out.println("Created player"+(i+1) + " where i is " + i);
 			}
 		}
 	}
@@ -275,14 +284,14 @@ public class Game extends BasicGameState {
 			ready.put(mainPlayer, "not ready");
 			player = new Player(25,true);
 			playersArr[playerCount] = player;
+			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
 		} else {
 			server.put(mainPlayer, "good guy", "createPlayer");
 			ready.put(mainPlayer, "not ready");
 			player = new Player(25,false);
 			playersArr[playerCount] = player;
+			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
 		}
-		
-		
 	}
 
 	public void updatePosition() throws InterruptedException  {
