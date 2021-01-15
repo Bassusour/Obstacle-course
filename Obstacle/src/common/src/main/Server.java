@@ -15,17 +15,23 @@ import org.jspace.SpaceRepository;
 class Server {
 	private static boolean sync = true; //false if multiplayer
 	
+	private static final String IP = "127.0.0.1:9001";
+	
 	//Main thread handles position of players
     public static void main(String[] args) {
     	try {
     		SpaceRepository repo = new SpaceRepository();
-    		repo.addGate("tcp://"+Client.ip+"/?keep");
+
+    		repo.addGate("tcp://" + IP + "/?keep");
     		
     		SequentialSpace players = new SequentialSpace();
     		repo.add("players", players);  		
     		
     		SequentialSpace server = new SequentialSpace();
     		repo.add("server", server);
+    		
+    		SequentialSpace ready = new SequentialSpace();
+    		repo.add("ready", ready);
     		
     		SequentialSpace player1 = new SequentialSpace();
     		repo.add("player1", player1);
@@ -40,9 +46,8 @@ class Server {
     		SequentialSpace player6 = new SequentialSpace();
     		repo.add("player6", player6);
 ;
-    		
-    		new Thread(new PlayerCountChecker(Client.ip)).start();
-    		new Thread(new PlayerRoles(Client.ip)).start();
+    		new Thread(new PlayerCountChecker(IP)).start();
+    		new Thread(new PlayerRoles(IP)).start();
     		
     		SequentialSpace[] arrPlayersSpaces = {player1, player2, player3, player4, player5, player6};
     		
@@ -74,7 +79,7 @@ class Server {
 					}
 				} else {
 					
-					Object[] notReadyPlayer = players.queryp(new FormalField(String.class),new FormalField(String.class), new ActualField("not ready"));
+					Object[] notReadyPlayer = ready.queryp(new FormalField(String.class), new ActualField("not ready"));
 					//for(int i = 0; i < players.size(); i++)
 					if(notReadyPlayer != null) {
 						continue;
@@ -131,6 +136,7 @@ class PlayerCountChecker implements Runnable {
 //Handles roles of each player
 class PlayerRoles implements Runnable {
 	RemoteSpace server;
+	RemoteSpace ready;
 	RemoteSpace players;
 	RemoteSpace player1;
 	RemoteSpace player2;
@@ -145,6 +151,7 @@ class PlayerRoles implements Runnable {
     public void run() {
     	try {
     		server = new RemoteSpace("tcp://"+ip+"/server?keep");
+    		ready = new RemoteSpace("tcp://"+ip+"/ready?keep");
     		players = new RemoteSpace("tcp://"+ip+"/players?keep");
     		player1 = new RemoteSpace("tcp://"+ip+"/player1?keep");
     		player2 = new RemoteSpace("tcp://"+ip+"/player2?keep");
@@ -155,8 +162,8 @@ class PlayerRoles implements Runnable {
     	while(true) {
     		try {
     			//gets players and puts them into 'players' space
-    			if(server.queryp(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new ActualField("createPlayer")) != null) {
-    				Object[] t = server.get(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class), new ActualField("createPlayer"));
+    			if(server.queryp(new FormalField(String.class), new FormalField(String.class), new ActualField("createPlayer")) != null) {
+    				Object[] t = server.get(new FormalField(String.class), new FormalField(String.class), new ActualField("createPlayer"));
         			//If already one bad guy (will do later)
         			/*if(players.query(new FormalField(String.class), new FormalField(String.class), new ActualField("bad guy")) != null) { 
         				
@@ -164,7 +171,7 @@ class PlayerRoles implements Runnable {
         				
         			}*/
         			//player1, good guy, not ready
-        			players.put(t[0], t[1], t[2]);
+        			players.put(t[0], t[1]);
         			System.out.println("put " + t[0]);
     			}
     			
@@ -173,13 +180,13 @@ class PlayerRoles implements Runnable {
     				System.out.println("Changing ready");
     				Object[] input = server.get(new FormalField(String.class), new FormalField(String.class), new ActualField("changeReady"));
     				System.out.println("Got input");
-    				Object[] selectedPlayer = players.get(new ActualField(input[0]), new FormalField(String.class), new FormalField(String.class));
+    				Object[] selectedPlayer = ready.get(new ActualField(input[0]), new FormalField(String.class));
     				System.out.println("Got player");
     				if(input[1].equals("ready")) {
-    					players.put(input[0], selectedPlayer[1], "ready");
+    					ready.put(input[0], "ready");
     					System.out.println("Updated " + input[0] + " to ready");
     				} else if(input[1].equals("not ready")) {
-    					players.put(input[0], selectedPlayer[1], "not ready");
+    					ready.put(input[0], "not ready");
     				}
     			}
     			
