@@ -23,6 +23,7 @@ public class Game extends BasicGameState {
 	
 	private RemoteSpace inbox;
 	private RemoteSpace server;
+	private RemoteSpace ready;
 
 	private RemoteSpace players;
 	private List<Object[]> allPlayers;
@@ -58,8 +59,9 @@ public class Game extends BasicGameState {
 			System.out.println(playerCount + "test");
 			mainPlayer = "player"+playerCount;
 			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
-			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
-			players = new RemoteSpace("tcp://25.56.25.201:9001/players?keep");
+			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
+			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
+			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
 			
 			createPlayer();
 			
@@ -229,14 +231,11 @@ public class Game extends BasicGameState {
 		} else {
 			try {
 				server.put(mainPlayer, "ready", "changeReady");
-				System.out.println("waiting for go");
 				inbox.get(new ActualField ("go"));
-				System.out.println("got go");
 				getPlayers();
 				go = true;
 				createPlayers = true;
 			} catch (InterruptedException e) { }
-		
 		}
 		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
@@ -246,47 +245,46 @@ public class Game extends BasicGameState {
 	
 	//"player1", "good guy", "not ready"
 	private void getPlayers() throws InterruptedException {
-		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class));
 		
 		for (int i = 0; i < allPlayers.size(); i++) {
 			boolean role = true;
 			if(allPlayers.get(i)[1].equals("good guy")) {
 				role = false;
-			} else if(allPlayers.get(i)[1].equals("bad guy")) {
+			} else {
 				role = true;
 			}
 			
 			System.out.println(allPlayers.get(i)[0]);
 			
 			/*
-			 * "player3", "bad guy", "ready"
-			 * "player2", "bad guy", "ready"
-			 * "player1", "bad guy", "ready"
+			 * "player1", "bad guy"
+			 * "player2", "bad guy"
 			 */
 			
 			if(allPlayers.get(i)[0].equals(mainPlayer)) {
 				System.out.println("Skipped itself as " + mainPlayer);
 				continue; //Should not create itself
 			} else {
-				playersArr[allPlayers.size()-i] = new Player(25, role);
-				System.out.println("Created player"+(allPlayers.size()-i) + "where i is " + i);
+				playersArr[i+1] = new Player(25, role);
+				System.out.println("Created player"+(i+1) + " where i is " + i);
 			}
 		}
 	}
 	private void createPlayer() throws InterruptedException {
-		if(Math.random() >= 0.0) {
-			server.put(mainPlayer, "bad guy", "not ready", "createPlayer");
+		if(Math.random() >= 0.5) {
+			server.put(mainPlayer, "bad guy", "createPlayer");
+			ready.put(mainPlayer, "not ready");
 			player = new Player(25,true);
 			playersArr[playerCount] = player;
 			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
 		} else {
-			server.put(mainPlayer, "good guy", "not ready", "createPlayer");
+			server.put(mainPlayer, "good guy", "createPlayer");
+			ready.put(mainPlayer, "not ready");
 			player = new Player(25,false);
 			playersArr[playerCount] = player;
 			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
 		}
-		
-		
 	}
 
 	public void updatePosition() throws InterruptedException  {
