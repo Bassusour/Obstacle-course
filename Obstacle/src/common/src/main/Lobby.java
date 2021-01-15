@@ -24,11 +24,12 @@ public class Lobby extends BasicGameState {
 	String host;
 	
 	RemoteSpace server;
+	RemoteSpace ready;
 	
 	private int windowWidth;
 	private int windowHeight;
 	
-	List<Object []> playerList;
+	List<Object []> reaadyList;
 	
 	String mouse;
 	String lobbyTitle = "LOBBY";
@@ -65,8 +66,9 @@ public class Lobby extends BasicGameState {
 		buttonClick = new Sound("res/buttonClickSound.wav");
 		mainMenuButton = new Image("res/mainMenuButton.png");
 		try {
-			players = new RemoteSpace("tcp://25.56.25.201:9001/players?keep");
-			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
+			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
+			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
+			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
 		} catch (IOException e) {}
 
 	}
@@ -81,7 +83,7 @@ public class Lobby extends BasicGameState {
 		g.drawImage(mainMenuButton, (windowWidth/2)+10, 900);
 		g.draw(playerBox);
 		
-		printPlayers(playerList, g);
+		printPlayers(reaadyList, g);
 
 	}
 
@@ -90,7 +92,7 @@ public class Lobby extends BasicGameState {
 		input = gc.getInput();
 		
 		try {
-			playerList = players.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+			reaadyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
 		} catch (InterruptedException e) {}
 		
 		int posX = input.getMouseX();
@@ -109,7 +111,7 @@ public class Lobby extends BasicGameState {
 	private void printPlayers (List<Object []> playerList, Graphics g) {
 		for(int i = 0, pos = 400; i < playerList.size(); i++, pos += 40) {
 			Object [] player = playerList.get(i);
-			String playerName = player[0].toString() + " - " + player[2];
+			String playerName = player[0].toString() + " - " + player[1];
 			TrueTypeFont font = new TrueTypeFont(new Font("Trebuchet", Font.BOLD, 25), true);
 			int width = font.getWidth(playerName);
 			font.drawString( playerBox.getX()+20, pos,  playerName);
