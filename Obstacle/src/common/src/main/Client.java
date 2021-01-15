@@ -74,7 +74,6 @@ public class Client extends StateBasedGame {
 
             app.setDisplayMode(WIDTH, HEIGHT, false);
             app.setShowFPS(true); // true for display the numbers of FPS
-
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
 			
@@ -83,8 +82,8 @@ public class Client extends StateBasedGame {
         }
 		
 		try {
-			RemoteSpace inbox = new RemoteSpace("tcp://25.65.87.75:9001/client1?keep");
-			RemoteSpace server = new RemoteSpace("tcp://25.65.87.75:9001/server?keep");
+			RemoteSpace inbox = new RemoteSpace("tcp://25.56.25.201:9001/client1?keep");
+			RemoteSpace server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
 			
 			System.out.println("Connected from client");
 			server.put("test from client");

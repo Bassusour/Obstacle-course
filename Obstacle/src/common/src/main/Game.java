@@ -123,7 +123,7 @@ public class Game extends BasicGameState {
 		}
 		
 		if(createPlayers) {
-			//System.out.println(playersArr[0] + ", " + playersArr[1] + ", " + playersArr[2] + ", " + playersArr[3]);
+			System.out.println(playersArr[0] + ", " + playersArr[1] + ", " + playersArr[2] + ", " + playersArr[3]);
 			for (int i = 0; i < allPlayers.size(); i++) {
 				//System.out.println("null at player " + (i+1));
 				graphics.setColor(playersArr[i+1].getColor());
@@ -269,7 +269,7 @@ public class Game extends BasicGameState {
 				continue; //Should not create itself
 			} else {
 				playersArr[allPlayers.size()-i] = new Player(25, role);
-				System.out.println("Created player"+(allPlayers.size()-i));
+				System.out.println("Created player"+(allPlayers.size()-i) + "where i is " + i);
 			}
 		}
 	}
