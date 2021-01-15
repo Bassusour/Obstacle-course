@@ -83,7 +83,7 @@ class Server {
 					//for(int i = 0; i < players.size(); i++)
 					if(notReadyPlayer != null) {
 						continue;
-					} else if(notReadyPlayer == null && players.size() >= 1) {
+					} else if(notReadyPlayer == null && ready.size() >= 1) {
 						for(int i = 0; i <= players.size(); i++) {
 							//sends go signal to all connected players
 							System.out.println("Size is " + players.size());

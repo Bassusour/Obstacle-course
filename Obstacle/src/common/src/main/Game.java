@@ -126,6 +126,7 @@ public class Game extends BasicGameState {
 		
 		if(createPlayers) {
 			for (int i = 1; i <= allPlayers.size(); i++) {
+				System.out.println("player" + playersArr[i]);
 				graphics.setColor(playersArr[i].getColor());
 				graphics.fill(playersArr[i].getShape());	
 			}
@@ -243,7 +244,7 @@ public class Game extends BasicGameState {
 	
 	//"player1", "good guy", "not ready"
 	private void getPlayers() throws InterruptedException {
-		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class), new FormalField(String.class));
+		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class));
 		
 		for (int i = 0; i < allPlayers.size(); i++) {
 			boolean role;
@@ -262,6 +263,7 @@ public class Game extends BasicGameState {
 			}
 		}
 	}
+	
 	private void createPlayer() throws InterruptedException {
 		if(Math.random() >= 0.5) {
 			server.put(mainPlayer, "bad guy", "createPlayer");

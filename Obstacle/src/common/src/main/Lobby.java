@@ -29,7 +29,7 @@ public class Lobby extends BasicGameState {
 	private int windowWidth;
 	private int windowHeight;
 	
-	List<Object []> reaadyList;
+	List<Object []> readyList;
 	
 	String mouse;
 	String lobbyTitle = "LOBBY";
@@ -83,7 +83,7 @@ public class Lobby extends BasicGameState {
 		g.drawImage(mainMenuButton, (windowWidth/2)+10, 900);
 		g.draw(playerBox);
 		
-		printPlayers(reaadyList, g);
+		printPlayers(readyList, g);
 
 	}
 
@@ -92,7 +92,7 @@ public class Lobby extends BasicGameState {
 		input = gc.getInput();
 		
 		try {
-			reaadyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
+			readyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
 		} catch (InterruptedException e) {}
 		
 		int posX = input.getMouseX();
