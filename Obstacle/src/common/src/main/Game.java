@@ -31,7 +31,7 @@ public class Game extends BasicGameState {
 	private String mainPlayer;
 	private Player[] playersArr = new Player[10];
 	private Client client;
-	private boolean go = false; //false if multiplayer
+	private boolean go = true; //false if multiplayer
 	private static int playerCount = 0;
 	public static final int ID = 1;
 	Image background;
@@ -58,8 +58,8 @@ public class Game extends BasicGameState {
 			System.out.println(playerCount);
 			mainPlayer = "player"+playerCount;
 			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
-			server = new RemoteSpace("tcp://25.56.25.201:9001/server?keep");
-			players = new RemoteSpace("tcp://25.56.25.201:9001/players?keep");
+			server = new RemoteSpace("tcp://"+Client.ip+"/server?keep");
+			players = new RemoteSpace("tcp://"+Client.ip+"/players?keep");
 			
 			createPlayer();
 			
@@ -71,13 +71,6 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void render(GameContainer container, StateBasedGame sbg,  Graphics graphics) throws SlickException {
-		
-		if(createPlayers) {
-			for (int i = 0; i < allPlayers.size(); i++) {
-				graphics.setColor(playersArr[i+1].getColor());
-				graphics.fill(playersArr[i+1].getShape());
-			}
-		}
 		
 		graphics.setBackground(Color.decode("#F7DFD3"));
 		
@@ -104,6 +97,13 @@ public class Game extends BasicGameState {
 		graphics.fill(new Rectangle(1720, 600, 100, 100));
 		graphics.fill(new Rectangle(1720, 800, 100, 100));
 		graphics.fill(new Rectangle(1200, 700, 100, 200));
+		
+		if(createPlayers) {
+			for (int i = 0; i < allPlayers.size(); i++) {
+				graphics.setColor(playersArr[i+1].getColor());
+				graphics.fill(playersArr[i+1].getShape());
+			}
+		}
 		
 		graphics.setColor(Color.orange);
 		
@@ -137,6 +137,7 @@ public class Game extends BasicGameState {
 		
 		
 		
+		
 		if(go) { //Waits for all clients to synchronize
 			
 			try {
@@ -161,8 +162,7 @@ public class Game extends BasicGameState {
 			
 			for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
 				Teleporter teleporter = Teleporter.PATH_ONE_TELEPORTERS[i];
-				if (player.getShape().intersects(teleporter.getShape())) {
-					if (input.isKeyPressed(Input.KEY_E)) {
+				if (player.getShape().intersects(teleporter.getShape()) && input.isKeyPressed(Input.KEY_E)) {
 						if (i % 2 == 0) {
 							player.setX(Teleporter.PATH_ONE_TELEPORTERS[i+1].getX() - player.getSize() / 2);
 							player.setY(Teleporter.PATH_ONE_TELEPORTERS[i+1].getY() - player.getSize() / 2);
@@ -170,7 +170,6 @@ public class Game extends BasicGameState {
 							player.setX(Teleporter.PATH_ONE_TELEPORTERS[i-1].getX() - player.getSize() / 2);
 							player.setY(Teleporter.PATH_ONE_TELEPORTERS[i-1].getY() - player.getSize() / 2);
 						}
-					}
 				}
 			}
 			
