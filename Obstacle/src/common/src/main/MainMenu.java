@@ -1,13 +1,14 @@
 package common.src.main;
 
 import java.awt.Font;
+import java.io.IOException;
 
+import org.jspace.RemoteSpace;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.TrueTypeFont;
@@ -27,6 +28,8 @@ public class MainMenu extends BasicGameState {
 	Image desktopButton;
 	TrueTypeFont font;
 	
+	RemoteSpace playerButler;
+	
 	Input input;
 	
 	TextField userField;
@@ -35,6 +38,10 @@ public class MainMenu extends BasicGameState {
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
+		try {
+			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");
+		} catch (IOException e) {}
+		
 		font = new TrueTypeFont(new Font("Trebuchet", Font.BOLD, 25), true);
 		userField = new TextField(gc, font, 0, 0, 200, 35);
 		
@@ -81,12 +88,21 @@ public class MainMenu extends BasicGameState {
 	private void findMatchClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(findMatchButton.getWidth()/2) && posX <= (windowWidth/2)-(findMatchButton.getWidth()/2) + findMatchButton.getWidth()) && (posY >= 300 && posY <= 300 + findMatchButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+				createPlayer();
 				buttonClick.play();
 				sbg.enterState(Client.LOBBY);
 			}
 		}
 	}
 	
+	private void createPlayer() {
+		try {
+			playerButler.put(username, "create player");
+			System.out.println("send create to server");
+		} catch (InterruptedException e) {}
+		
+	}
+
 	private void createClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(createButton.getWidth()/2) && posX <= (windowWidth/2)-(createButton.getWidth()/2) + createButton.getWidth()) && (posY >= 400 && posY <= 400 + createButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {

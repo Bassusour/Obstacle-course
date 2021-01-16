@@ -1,137 +1,261 @@
 package common.src.main;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.jspace.SequentialSpace;
-import org.jspace.Space;
 import org.jspace.SpaceRepository;
 
 class Server {
 	private static boolean sync = false; //false if multiplayer
 	
-	private static final String IP = "127.0.0.1:9001";
+	public static final String IP = "127.0.0.1:9001";
+	public static HashMap<String, SequentialSpace> players;
 	
 	//Main thread handles position of players
     public static void main(String[] args) {
-    	try {
-    		SpaceRepository repo = new SpaceRepository();
-    		repo.addGate("tcp://" + IP + "/?keep");
-    		
-    		SequentialSpace players = new SequentialSpace();
-    		repo.add("players", players);  		
-    		
-    		SequentialSpace server = new SequentialSpace();
-    		repo.add("server", server);
-    		
-    		SequentialSpace ready = new SequentialSpace();
-    		repo.add("ready", ready);
-    		
-    		SequentialSpace player1 = new SequentialSpace();
-    		repo.add("player1", player1);
-    		SequentialSpace player2 = new SequentialSpace();
-    		repo.add("player2", player2);
-    		SequentialSpace player3 = new SequentialSpace();
-    		repo.add("player3", player3);
-    		SequentialSpace player4 = new SequentialSpace();
-    		repo.add("player4", player4);
-    		SequentialSpace player5 = new SequentialSpace();
-    		repo.add("player5", player5);
-    		SequentialSpace player6 = new SequentialSpace();
-    		repo.add("player6", player6);
-;
-    		
-    		new Thread(new PlayerCountChecker(IP)).start();
-    		new Thread(new PlayerRoles(IP)).start();
-    		
-    		SequentialSpace[] arrPlayersSpaces = {player1, player2, player3, player4, player5, player6};
-    		
-    		System.out.println("Created spaces");
+    	players = new HashMap<String, SequentialSpace>();
+    	
+//    	players.put("init", new SequentialSpace());
+    	
+    	SpaceRepository repo = new SpaceRepository();
+		repo.addGate("tcp://" + IP + "/?keep");  		
+		
+		SequentialSpace server = new SequentialSpace();
+		repo.add("server", server);
+		
+		SequentialSpace ready = new SequentialSpace();
+		repo.add("ready", ready);
+		
+		SequentialSpace playerButler = new SequentialSpace();
+		repo.add("playerButler", playerButler);
+		
+		SequentialSpace positionButler = new SequentialSpace();
+		repo.add("positionButler", positionButler);
+		
+		
+		
+//    		new Thread(new PlayerCountChecker(IP)).start();
+//		new Thread(new PlayerRoles(IP)).start();
+		new Thread(new PlayerController()).start();
+		new Thread(new ReadyController()).start();
+		new Thread(new PositionController()).start();
+		
+		System.out.println("Created spaces");
+		
+		while(true) {
 			
-			while(true) {
+			if(sync) {
 				
-				if(sync) {
-					Object[] t = server.get(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class));
-					
-					if(t[2].equals("player1")) {
-						//System.out.println("Sent player1 pos");
-						player2.put(t[0], t[1], "player1", "Pos");
-						player3.put(t[0], t[1], "player1", "Pos");
-						player4.put(t[0], t[1], "player1", "Pos");
-					} else if(t[2].equals("player2")) {
-						//System.out.println("Sent player2 pos");
-						player1.put(t[0], t[1], "player2", "Pos");
-						player3.put(t[0], t[1], "player2", "Pos");
-						player4.put(t[0], t[1], "player2", "Pos");
-					} else if(t[2].equals("player3")) {
-						player1.put(t[0], t[1], "player3", "Pos");
-						player2.put(t[0], t[1], "player3", "Pos");
-						player4.put(t[0], t[1], "player3", "Pos");
-					} else if(t[2].equals("player4")) {
-						player1.put(t[0], t[1], "player4", "Pos");
-						player2.put(t[0], t[1], "player4", "Pos");
-						player3.put(t[0], t[1], "player4", "Pos");
-					}
-				} else {
-					
-					Object[] notReadyPlayer = ready.queryp(new FormalField(String.class), new ActualField("not ready"));
-					//for(int i = 0; i < players.size(); i++)
-					if(notReadyPlayer != null) {
-						continue;
-					} else if(notReadyPlayer == null && ready.size() >= 1) {
-						for(int i = 0; i <= players.size(); i++) {
-							//sends go signal to all connected players
-							System.out.println("Size is " + players.size());
-							arrPlayersSpaces[i].put("go");
-							System.out.println("Sent go to player" + (i+1));
-						}
-						sync = true;
-					}
-				}
 				
-				}
+			} else {
+				
+				
+			}
 			
-			
-		} catch (InterruptedException e) { }
+			}
     }
 }
 
-//Handles player count
-class PlayerCountChecker implements Runnable {
-	RemoteSpace server;
-	RemoteSpace player1;
-	RemoteSpace player2;
-	RemoteSpace player3;
-	private int playerCount = 1;
-	private String ip;
+class PlayerController implements Runnable {
 	
-	public PlayerCountChecker(String ip) {
-		this.ip = ip;
+	RemoteSpace playerButler;
+	RemoteSpace ready;
+	Map<String, SequentialSpace> players;
+	
+	public PlayerController() {
+		
+	}
+
+	@Override
+	public void run() {
+		
+		try {
+			playerButler = new RemoteSpace("tcp://" + Server.IP + "/playerButler?keep");
+			ready = new RemoteSpace("tcp://" + Server.IP + "/ready?keep");
+			players = Server.players;
+		} catch (IOException e) {}
+		
+		while(true) {
+			
+			try {
+				Object[] create = playerButler.getp(new FormalField(String.class), new ActualField("create player"));
+				
+				if(create != null) {
+					if (!players.containsKey(create[0])) {
+						players.put(create[0].toString(), new SequentialSpace());
+						players.get(create[0]).put("role", "good guy");
+						ready.put(create[0], "not ready");
+					} else {
+						playerButler.put(create[0], "user exists");
+					}
+				}
+				
+			} catch (InterruptedException e) {}
+			
+			
+			try {
+				Object[] remove = playerButler.getp(new FormalField(String.class), new ActualField("remove player"));
+				
+				if (remove != null) {
+					players.remove(remove[0]);
+				}
+
+				
+			} catch (InterruptedException e) {}
+		}		
+	}
+}
+	
+class ReadyController implements Runnable {
+
+	RemoteSpace ready;
+	Map<String, SequentialSpace> players;
+	boolean allReady = false;
+	
+	
+	@Override
+	public void run() {
+		
+		players = Server.players;
+		try {
+			ready = new RemoteSpace("tcp://" + Server.IP + "/ready?keep");
+		} catch (IOException e) {}
+		
+		while(!false) {
+			try {
+				Object[] getChange = ready.getp(new FormalField(String.class), new ActualField("change ready"), new FormalField(String.class));
+				if(getChange != null) {
+					Object[] getReady = ready.get(new ActualField(getChange[0]), new FormalField(String.class));
+					if (getReady[1].equals("not ready")) {
+						ready.put(getReady[0], "ready");
+					} else if (getReady[1].equals("ready")) {
+						ready.put(getReady[0], "not ready");
+					}
+						
+				}
+			} catch (InterruptedException e) {}
+			
+			List<Object[]> readyList = null;
+			
+			try {
+				readyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
+//				System.out.println("Ready List : " + readyList.toString());
+			} catch (InterruptedException e1) {}
+			allReady = checkReady(readyList);
+			
+			 
+			 if (allReady) {
+				 try {
+					ready.put("all ready");
+				} catch (InterruptedException e) {}
+			 }
+		}
+		
 	}
 	
-    public void run() {
-    	try {
-    		server = new RemoteSpace("tcp://"+ip+"/server?keep");
-    		player1 = new RemoteSpace("tcp://"+ip+"/player1?keep");
-    		player2 = new RemoteSpace("tcp://"+ip+"/player2?keep");
-    		//player3 = new RemoteSpace("tcp://"+ip+"/player3?keep");
-    	} catch (IOException e) { } 
-    	
+	public boolean checkReady(List<Object[]> readyList) {
 		
-    	while(true) {
-    		try {
-    			server.get(new ActualField("getPlayerCount"));
-    			server.put(playerCount, "playerCount");
-    			playerCount++;
-    		} catch (InterruptedException e) { } 
-    	}
-    }
+		int count = 0;
+		
+		if(readyList.size() == 0) {
+			return false;
+		}
+		
+		for(int i = 0; i < readyList.size(); i++) {
+			if (readyList.get(i)[1].equals("ready")) {
+				count++;
+			}
+			
+		}
+		
+		if(count == readyList.size()) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
 }
+
+class PositionController implements Runnable {
+	
+	RemoteSpace positionButler;
+	Map<String, SequentialSpace> players;
+
+	@Override
+	public void run() {
+		
+		players = Server.players;
+		
+		try {
+			positionButler = new RemoteSpace("tcp://" + Server.IP + "/positionButler?keep");
+		} catch (IOException e) {}
+		
+		while(true) {
+			try {
+				if (positionButler.queryp(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new ActualField("give position")) != null) {
+					Object[] pos = positionButler.get(new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class), new ActualField("give position"));
+
+					for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
+						if (!entry.getKey().equals(pos[0])) {
+							entry.getValue().put("positionQueue", pos[0], pos[1], pos[2]);
+						}
+					}
+				}
+				
+				for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
+					if (entry.getValue().queryp(new ActualField("positionQueue"), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class)) != null) {
+						Object[] pos = entry.getValue().get(new ActualField("positionQueue"), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class));
+						positionButler.put(entry.getKey(), pos[1], pos[2], pos[3]);
+					}
+				}
+			} catch (InterruptedException e) {}
+		}
+		
+	}
+	
+}
+	
+
+
+//Handles player count
+//class PlayerCountChecker implements Runnable {
+//	RemoteSpace server;
+//	RemoteSpace player1;
+//	RemoteSpace player2;
+//	RemoteSpace player3;
+//	private int playerCount = 1;
+//	private String ip;
+//	
+//	public PlayerCountChecker(String ip) {
+//		this.ip = ip;
+//	}
+//	
+//    public void run() {
+//    	try {
+//    		server = new RemoteSpace("tcp://"+ip+"/server?keep");
+//    		player1 = new RemoteSpace("tcp://"+ip+"/player1?keep");
+//    		player2 = new RemoteSpace("tcp://"+ip+"/player2?keep");
+//    		//player3 = new RemoteSpace("tcp://"+ip+"/player3?keep");
+//    	} catch (IOException e) { } 
+//    	
+//		
+//    	while(true) {
+//    		try {
+//    			server.get(new ActualField("getPlayerCount"));
+//    			server.put(playerCount, "playerCount");
+//    			playerCount++;
+//    		} catch (InterruptedException e) { } 
+//    	}
+//    }
+//}
 
 //Handles roles of each player
 class PlayerRoles implements Runnable {
@@ -180,13 +304,14 @@ class PlayerRoles implements Runnable {
     				System.out.println("Changing ready");
     				Object[] input = server.get(new FormalField(String.class), new FormalField(String.class), new ActualField("changeReady"));
     				System.out.println("Got input");
-    				Object[] selectedPlayer = ready.get(new ActualField(input[0]), new FormalField(String.class));
-    				System.out.println("Got player");
+    				ready.get(new ActualField(input[0]), new FormalField(String.class));
+    				System.out.println("Removed old ready");
     				if(input[1].equals("ready")) {
     					ready.put(input[0], "ready");
     					System.out.println("Updated " + input[0] + " to ready");
     				} else if(input[1].equals("not ready")) {
     					ready.put(input[0], "not ready");
+    					System.out.println("Updated " + input[0] + " to not ready");
     				}
     			}
     			

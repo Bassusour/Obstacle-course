@@ -1,7 +1,9 @@
 package common.src.main;
 
 import java.awt.Font;
+import java.io.IOException;
 
+import org.jspace.RemoteSpace;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -23,6 +25,8 @@ public class Pause extends BasicGameState {
 	Image mainMenuButton;
 	Image desktopButton;
 	
+	RemoteSpace server;
+	
 	Sound buttonClick;
 	
 	Input input;
@@ -32,6 +36,10 @@ public class Pause extends BasicGameState {
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
+//		try {
+//			server = new RemoteSpace("tcp//" + Client.IP + "server?keep");
+//		} catch (IOException e) {}
+		
 		resumeGameButton = new Image("res/resumeGameButton.png");
 		optionsButton = new Image("res/optionsButton.png");
 		mainMenuButton = new Image("res/mainMenuButton.png");
@@ -109,6 +117,7 @@ public class Pause extends BasicGameState {
 		if((posX >= (windowWidth/2)-(desktopButton.getWidth()/2) && posX <= (windowWidth/2)-(desktopButton.getWidth()/2) + desktopButton.getWidth()) && (posY >= 700 && posY <= 700 + desktopButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				buttonClick.play();
+//				server.put("player"+playerCount);
 				gc.exit();
 			}
 		}

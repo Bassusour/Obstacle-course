@@ -24,7 +24,6 @@ public class Client extends StateBasedGame {
 	//Client-server
 	private static RemoteSpace inbox;
 	private static RemoteSpace server;
-	private static int playerCount = 0;
 	
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
@@ -51,7 +50,6 @@ public class Client extends StateBasedGame {
 	public static void main(String[] args) {
 
 		try {
-
 			server = new RemoteSpace("tcp://" + IP + "/server?keep");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 //			System.out.println("Enter ip address or \"localhost\"");
@@ -66,10 +64,8 @@ public class Client extends StateBasedGame {
 //			String port = reader.readLine();
 			String port = "9001";
 			
-			server.put("getPlayerCount");
-			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
+//			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
 			
-			inbox = new RemoteSpace("tcp://" + IP + "/player" + playerCount + "?keep");
             
             System.out.println("Sucessfully setup");
             
@@ -80,7 +76,7 @@ public class Client extends StateBasedGame {
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
 			
-        } catch (SlickException | IOException | InterruptedException e) {
+        } catch (SlickException | IOException e) {
             e.printStackTrace();
         }
 		
@@ -96,11 +92,11 @@ public class Client extends StateBasedGame {
 
 	public void initStatesList(GameContainer gc) throws SlickException {
 		this.addState(new MainMenu());
-		this.addState(new Game(playerCount, inbox));
+		this.addState(new Game());
 		this.addState(new Pause());
 		this.addState(new FindMatch());
 		this.addState(new CreateMatch());
-		this.addState(new Lobby(playerCount));
+		this.addState(new Lobby());
 
 	}
 

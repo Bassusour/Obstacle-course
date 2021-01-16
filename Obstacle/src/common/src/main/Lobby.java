@@ -2,8 +2,11 @@ package common.src.main;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.newdawn.slick.GameContainer;
@@ -30,6 +33,7 @@ public class Lobby extends BasicGameState {
 	private int windowHeight;
 	
 	List<Object []> readyList;
+	public static ArrayList<Player> playerList;
 	
 	String mouse;
 	String lobbyTitle = "LOBBY";
@@ -45,18 +49,16 @@ public class Lobby extends BasicGameState {
 	RemoteSpace players;
 	
 	Rectangle playerBox;
-	private int playerCount;
+
 	
 	Image readyButton;
 	Image mainMenuButton;
 
-	public Lobby(int playerCount) {
-		this.playerCount = playerCount;
+	public Lobby() {
 	}
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		gc.setMinimumLogicUpdateInterval(20);
 		playerBox = new Rectangle(0,380,700, 430);
 		font = new TrueTypeFont(new Font("Trebuchet", Font.BOLD, 50), true);
 		font2 = new TrueTypeFont(new Font("Trebuchet", Font.ITALIC, 30), true);
@@ -70,7 +72,7 @@ public class Lobby extends BasicGameState {
 			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
 			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
 		} catch (IOException e) {}
-
+		playerList = new ArrayList<Player>();
 	}
 
 	@Override
@@ -95,6 +97,14 @@ public class Lobby extends BasicGameState {
 			readyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
 		} catch (InterruptedException e) {}
 		
+		for (int i = 0; i < readyList.size(); i++) {
+			String username = readyList.get(i)[0].toString();
+			if(!hasPlayer(username)) {
+				playerList.add(new Player(25, false, username));
+			}
+			
+		}
+		
 		int posX = input.getMouseX();
 		int posY = input.getMouseY();
 		
@@ -105,7 +115,26 @@ public class Lobby extends BasicGameState {
 		
 		readyClick(posX, posY, sbg);
 		mainMenuClick(posX, posY, sbg);
+		
+		Object[] allReady = null;
+		try {
+			allReady = ready.queryp(new ActualField("all ready"));
+		} catch (InterruptedException e) {}
+		
+		if(allReady != null) {
+			sbg.enterState(Client.GAME);
+		}
 
+	}
+	
+	private boolean hasPlayer (String username) {
+		for (Player player : playerList) {
+			if(player.getUsername().equals(username)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	private void printPlayers (List<Object []> playerList, Graphics g) {
@@ -122,10 +151,9 @@ public class Lobby extends BasicGameState {
 		if((posX >= (windowWidth/2)-(readyButton.getWidth()) && posX <= (windowWidth/2) && (posY >= 900 && posY <= 900 + readyButton.getHeight()))) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				try {
-					server.put("player"+playerCount, "ready", "changeReady");
+					ready.put(MainMenu.username, "change ready", "poop");
 				} catch (InterruptedException e) {}
 				buttonClick.play();
-				sbg.enterState(Client.GAME);
 			}
 		}
 	}
