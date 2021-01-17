@@ -28,12 +28,10 @@ public class Lobby extends BasicGameState {
 	
 	String host;
 	
-	RemoteSpace server;
 	RemoteSpace ready;
 	RemoteSpace playerButler;
 	
 	private int windowWidth;
-	private int windowHeight;
 	
 	List<Object []> readyList;
 	
@@ -48,7 +46,6 @@ public class Lobby extends BasicGameState {
 	int width;
 	
 	Input input;
-	RemoteSpace players;
 	
 	Rectangle playerBox;
 	
@@ -68,10 +65,9 @@ public class Lobby extends BasicGameState {
 		readyButton = new Image("res/readyButton.png");
 		buttonClick = new Sound("res/buttonClickSound.wav");
 		mainMenuButton = new Image("res/mainMenuButton.png");
+		gc.setAlwaysRender(true);
 		try {
 			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");
-			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
-			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
 			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
 		} catch (IOException e) {}
 		playerList = Client.playerList;
@@ -102,6 +98,7 @@ public class Lobby extends BasicGameState {
 		
 		for (int i = 0; i < readyList.size(); i++) {
 			String username = readyList.get(i)[0].toString();
+			//System.out.println(username);
 			if(!hasPlayer(username)) {
 				playerList.add(new Player(25, false, username));
 			}
@@ -137,7 +134,6 @@ public class Lobby extends BasicGameState {
 		int posY = input.getMouseY();
 		
 		windowWidth = gc.getWidth();
-		windowHeight = gc.getHeight();
 		
 		mouse = "x: " + posX + " y: " + posY;
 		
@@ -146,10 +142,11 @@ public class Lobby extends BasicGameState {
 		
 		Object[] allReady = null;
 		try {
-			allReady = ready.queryp(new ActualField("all ready"));
+			allReady = ready.queryp(new ActualField("all ready"), new FormalField(Integer.class));
 		} catch (InterruptedException e) {}
 		
 		if(allReady != null) {
+			playerList.get((int) allReady[1]).setEnemy(true);
 			sbg.enterState(Client.GAME);
 		}
 
@@ -179,6 +176,7 @@ public class Lobby extends BasicGameState {
 		if((posX >= (windowWidth/2)-(readyButton.getWidth()) && posX <= (windowWidth/2) && (posY >= 900 && posY <= 900 + readyButton.getHeight()))) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				try {
+					//System.out.println(MainMenu.username);
 					ready.put(MainMenu.username, "change ready", "poop");
 				} catch (InterruptedException e) {}
 				buttonClick.play();
