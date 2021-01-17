@@ -26,11 +26,9 @@ public class Lobby extends BasicGameState {
 	
 	String host;
 	
-	RemoteSpace server;
 	RemoteSpace ready;
 	
 	private int windowWidth;
-	private int windowHeight;
 	
 	List<Object []> readyList;
 	public static ArrayList<Player> playerList;
@@ -46,7 +44,6 @@ public class Lobby extends BasicGameState {
 	int width;
 	
 	Input input;
-	RemoteSpace players;
 	
 	Rectangle playerBox;
 
@@ -67,9 +64,8 @@ public class Lobby extends BasicGameState {
 		readyButton = new Image("res/readyButton.png");
 		buttonClick = new Sound("res/buttonClickSound.wav");
 		mainMenuButton = new Image("res/mainMenuButton.png");
+		gc.setAlwaysRender(true);
 		try {
-			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
-			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
 			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
 		} catch (IOException e) {}
 		playerList = new ArrayList<Player>();
@@ -109,7 +105,6 @@ public class Lobby extends BasicGameState {
 		int posY = input.getMouseY();
 		
 		windowWidth = gc.getWidth();
-		windowHeight = gc.getHeight();
 		
 		mouse = "x: " + posX + " y: " + posY;
 		
@@ -118,10 +113,12 @@ public class Lobby extends BasicGameState {
 		
 		Object[] allReady = null;
 		try {
-			allReady = ready.queryp(new ActualField("all ready"));
+			allReady = ready.queryp(new ActualField("all ready"), new FormalField(Integer.class));
 		} catch (InterruptedException e) {}
 		
 		if(allReady != null) {
+			System.out.println("Should start");
+			playerList.get((int) allReady[1]).setEnemy(true);
 			sbg.enterState(Client.GAME);
 		}
 

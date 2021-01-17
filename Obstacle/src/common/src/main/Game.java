@@ -23,8 +23,6 @@ public class Game extends BasicGameState {
 	private RemoteSpace positionButler;
 
 	ArrayList<Player> playerList;
-
-	private boolean go = false; //false if multiplayer
 	public static final int ID = 1;
 	Image background;
 	
@@ -39,11 +37,9 @@ public class Game extends BasicGameState {
 	
 	private boolean createdPlayer = false;
 
-	public Game() {
-	}
-
 	@Override
-	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
+	public void init(GameContainer gc,  StateBasedGame sbg) throws SlickException {
+		gc.setAlwaysRender(true);
 		try {
 			positionButler = new RemoteSpace("tcp://" + Client.IP + "/positionButler?keep");
 

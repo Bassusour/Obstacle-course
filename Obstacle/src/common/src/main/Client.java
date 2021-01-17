@@ -21,9 +21,6 @@ import org.newdawn.slick.geom.ShapeRenderer;
 import org.newdawn.slick.state.StateBasedGame;
 
 public class Client extends StateBasedGame {
-	//Client-server
-	private static RemoteSpace inbox;
-	private static RemoteSpace server;
 	
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
@@ -50,11 +47,9 @@ public class Client extends StateBasedGame {
 	public static void main(String[] args) {
 
 		try {
-			server = new RemoteSpace("tcp://" + IP + "/server?keep");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			//BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 //			System.out.println("Enter ip address or \"localhost\"");
 //			String ip = reader.readLine();
-			String ip = IP;
 			
 //			if (ip.equals("localhost")) {
 //				ip = "127.0.0.1";
@@ -62,32 +57,17 @@ public class Client extends StateBasedGame {
 			
 //			System.out.println("Enter port number");
 //			String port = reader.readLine();
-			String port = "9001";
 			
-//			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
-			
-            
-            System.out.println("Sucessfully setup");
-            
-            AppGameContainer app = new AppGameContainer(new Client("Title"));
+            AppGameContainer app = new AppGameContainer(new Client("xXD34ÜhRµÒXx"));
 
             app.setDisplayMode(WIDTH, HEIGHT, false);
             app.setShowFPS(true); // true for display the numbers of FPS
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
 			
-        } catch (SlickException | IOException e) {
+        } catch (SlickException e) {
             e.printStackTrace();
         }
-		
-		try {
-			RemoteSpace inbox = new RemoteSpace("tcp://" + IP + "/client1?keep");
-			RemoteSpace server = new RemoteSpace("tcp://" + IP + "/server?keep");
-			
-			System.out.println("Connected from client");
-			server.put("test from client");
-			
-		} catch (IOException | InterruptedException e) { }
 	}
 
 	public void initStatesList(GameContainer gc) throws SlickException {
