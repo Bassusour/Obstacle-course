@@ -3,6 +3,7 @@ package common.src.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.jspace.ActualField;
@@ -22,13 +23,13 @@ import org.newdawn.slick.state.StateBasedGame;
 
 public class Client extends StateBasedGame {
 	//Client-server
-	private static RemoteSpace inbox;
-	private static RemoteSpace server;
 	
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
 	
 	public static final String IP = "127.0.0.1:9001";
+	
+	public static ArrayList<Player> playerList;
 
 	// Game state ids
 	public static final int MAIN_MENU = 0;
@@ -50,7 +51,6 @@ public class Client extends StateBasedGame {
 	public static void main(String[] args) {
 
 		try {
-			server = new RemoteSpace("tcp://" + IP + "/server?keep");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 //			System.out.println("Enter ip address or \"localhost\"");
 //			String ip = reader.readLine();
@@ -63,11 +63,10 @@ public class Client extends StateBasedGame {
 //			System.out.println("Enter port number");
 //			String port = reader.readLine();
 			String port = "9001";
-			
-//			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
-			
             
             System.out.println("Sucessfully setup");
+            
+            playerList = new ArrayList<Player>();
             
             AppGameContainer app = new AppGameContainer(new Client("Title"));
 
@@ -76,12 +75,11 @@ public class Client extends StateBasedGame {
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();
 			
-        } catch (SlickException | IOException e) {
+        } catch (SlickException e) {
             e.printStackTrace();
         }
 		
 		try {
-			RemoteSpace inbox = new RemoteSpace("tcp://" + IP + "/client1?keep");
 			RemoteSpace server = new RemoteSpace("tcp://" + IP + "/server?keep");
 			
 			System.out.println("Connected from client");
@@ -101,3 +99,4 @@ public class Client extends StateBasedGame {
 	}
 
 }
+

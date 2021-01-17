@@ -115,6 +115,9 @@ public class MainMenu extends BasicGameState {
 	private void desktopClick(int posX, int posY, GameContainer gc) {
 		if((posX >= (windowWidth/2)-(desktopButton.getWidth()/2) && posX <= (windowWidth/2)-(desktopButton.getWidth()/2) + desktopButton.getWidth()) && (posY >= 500 && posY <= 500 + desktopButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+				try {
+					playerButler.put(MainMenu.username, "remove player");
+				} catch (InterruptedException e) {}
 				buttonClick.play();
 				gc.exit();
 			}

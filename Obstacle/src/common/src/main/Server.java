@@ -38,11 +38,8 @@ class Server {
 		
 		SequentialSpace positionButler = new SequentialSpace();
 		repo.add("positionButler", positionButler);
-		
-		
-		
-//    		new Thread(new PlayerCountChecker(IP)).start();
-//		new Thread(new PlayerRoles(IP)).start();
+
+
 		new Thread(new PlayerController()).start();
 		new Thread(new ReadyController()).start();
 		new Thread(new PositionController()).start();
@@ -59,7 +56,7 @@ class Server {
 				
 			}
 			
-			}
+		}
     }
 }
 
@@ -84,6 +81,8 @@ class PlayerController implements Runnable {
 		
 		while(true) {
 			
+//			System.out.println("Server player list :" + players.toString());
+			
 			try {
 				Object[] create = playerButler.getp(new FormalField(String.class), new ActualField("create player"));
 				
@@ -94,6 +93,7 @@ class PlayerController implements Runnable {
 						ready.put(create[0], "not ready");
 					} else {
 						playerButler.put(create[0], "user exists");
+						System.out.println("uhh?");
 					}
 				}
 				
@@ -105,6 +105,13 @@ class PlayerController implements Runnable {
 				
 				if (remove != null) {
 					players.remove(remove[0]);
+					ready.get(new ActualField(remove[0]), new FormalField(String.class));
+					ready.getp(new ActualField("all ready"));
+					for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
+						if(!entry.getKey().equals(remove[0])) {
+							playerButler.put(entry.getKey(), "remove other player", remove[0]);
+						}
+					}
 				}
 
 				
@@ -146,16 +153,16 @@ class ReadyController implements Runnable {
 			
 			try {
 				readyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
-//				System.out.println("Ready List : " + readyList.toString());
 			} catch (InterruptedException e1) {}
 			allReady = checkReady(readyList);
 			
+			System.out.println("Ready list: " + readyList.toString());
 			 
-			 if (allReady) {
-				 try {
+			 try {
+				if (allReady && ready.queryp(new ActualField("all ready")) == null) {
 					ready.put("all ready");
-				} catch (InterruptedException e) {}
-			 }
+				 }
+			} catch (InterruptedException e) {}
 		}
 		
 	}
@@ -222,40 +229,6 @@ class PositionController implements Runnable {
 	}
 	
 }
-	
-
-
-//Handles player count
-//class PlayerCountChecker implements Runnable {
-//	RemoteSpace server;
-//	RemoteSpace player1;
-//	RemoteSpace player2;
-//	RemoteSpace player3;
-//	private int playerCount = 1;
-//	private String ip;
-//	
-//	public PlayerCountChecker(String ip) {
-//		this.ip = ip;
-//	}
-//	
-//    public void run() {
-//    	try {
-//    		server = new RemoteSpace("tcp://"+ip+"/server?keep");
-//    		player1 = new RemoteSpace("tcp://"+ip+"/player1?keep");
-//    		player2 = new RemoteSpace("tcp://"+ip+"/player2?keep");
-//    		//player3 = new RemoteSpace("tcp://"+ip+"/player3?keep");
-//    	} catch (IOException e) { } 
-//    	
-//		
-//    	while(true) {
-//    		try {
-//    			server.get(new ActualField("getPlayerCount"));
-//    			server.put(playerCount, "playerCount");
-//    			playerCount++;
-//    		} catch (InterruptedException e) { } 
-//    	}
-//    }
-//}
 
 //Handles roles of each player
 class PlayerRoles implements Runnable {

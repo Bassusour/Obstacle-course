@@ -2,6 +2,7 @@ package common.src.main;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.jspace.RemoteSpace;
 import org.newdawn.slick.Color;
@@ -25,7 +26,10 @@ public class Pause extends BasicGameState {
 	Image mainMenuButton;
 	Image desktopButton;
 	
+	ArrayList<Player> playerList;
+	
 	RemoteSpace server;
+	RemoteSpace playerButler;
 	
 	Sound buttonClick;
 	
@@ -36,9 +40,11 @@ public class Pause extends BasicGameState {
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-//		try {
-//			server = new RemoteSpace("tcp//" + Client.IP + "server?keep");
-//		} catch (IOException e) {}
+		try {
+			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");
+		} catch (IOException e) {}
+		
+		playerList = Client.playerList;
 		
 		resumeGameButton = new Image("res/resumeGameButton.png");
 		optionsButton = new Image("res/optionsButton.png");
@@ -77,10 +83,6 @@ public class Pause extends BasicGameState {
 		mainMenuClick(posX, posY, sbg);
 		desktopClick(posX, posY, gc);
 		
-		if(input.isKeyPressed(Input.KEY_0)) {
-			gc.exit();
-		}
-		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 			sbg.enterState(1);
 		}		
@@ -107,6 +109,18 @@ public class Pause extends BasicGameState {
 	private void mainMenuClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)-(mainMenuButton.getWidth()/2) && posX <= (windowWidth/2)-(mainMenuButton.getWidth()/2) + mainMenuButton.getWidth()) && (posY >= 600 && posY <= 600 + mainMenuButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+				try {
+					playerButler.put(MainMenu.username, "remove player");
+				} catch (InterruptedException e) {}
+				int index = -1;
+				for (int i = 0; i < playerList.size(); i++) {
+					if (playerList.get(i).getUsername().equals(MainMenu.username)) {
+						index = i;
+					}
+				}
+				if (index != -1) {
+					playerList.remove(index);
+				}
 				buttonClick.play();
 				sbg.enterState(Client.MAIN_MENU);
 			}
@@ -117,7 +131,18 @@ public class Pause extends BasicGameState {
 		if((posX >= (windowWidth/2)-(desktopButton.getWidth()/2) && posX <= (windowWidth/2)-(desktopButton.getWidth()/2) + desktopButton.getWidth()) && (posY >= 700 && posY <= 700 + desktopButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				buttonClick.play();
-//				server.put("player"+playerCount);
+				try {
+					playerButler.put(MainMenu.username, "remove player");
+				} catch (InterruptedException e) {}
+				int index = -1;
+				for (int i = 0; i < playerList.size(); i++) {
+					if (playerList.get(i).getUsername().equals(MainMenu.username)) {
+						index = i;
+					}
+				}
+				if (index != -1) {
+					playerList.remove(index);
+				}
 				gc.exit();
 			}
 		}

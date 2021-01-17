@@ -21,6 +21,7 @@ import org.newdawn.slick.state.StateBasedGame;
 public class Game extends BasicGameState {
 	
 	private RemoteSpace positionButler;
+	RemoteSpace playerButler;
 
 	ArrayList<Player> playerList;
 
@@ -40,15 +41,18 @@ public class Game extends BasicGameState {
 	private boolean createdPlayer = false;
 
 	public Game() {
+		
 	}
 
 	@Override
 	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
 		try {
 			positionButler = new RemoteSpace("tcp://" + Client.IP + "/positionButler?keep");
-
+			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");
 			
 		} catch (IOException e) { }
+		playerList = Client.playerList;
+		
 		path = new Path(Path.PATH_ONE_HORIZONTAL, Path.PATH_ONE_VERTICAL);
 		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS);
 		
@@ -88,11 +92,6 @@ public class Game extends BasicGameState {
 		for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
 			graphics.fill(room.getTeleportElement(i));
 		}
-		//graphics.setColor(player.getColor());
-		//graphics.fill(player.getShape());
-
-		drawPlayers(graphics, container);
-
 		
 		graphics.setColor(Color.white);
 		
@@ -104,14 +103,17 @@ public class Game extends BasicGameState {
 			graphics.fill(path.getVerticalElement(i));
 		}
 		
+		drawPlayers(graphics, container);
+		
 	}
 
 	@Override
 	public void update(GameContainer con, StateBasedGame sbg,  int arg1) throws SlickException {
 		Input input = con.getInput();
 		
+//		System.out.println("Player list: " + playerList.toString());
+		
 		if(!createdPlayer) {
-			playerList = Lobby.playerList;
 			for (Player player : playerList) {
 				if (player.getUsername().equals(MainMenu.username)) {
 					this.player = player;
@@ -119,6 +121,21 @@ public class Game extends BasicGameState {
 			}
 			createdPlayer = true;
 		}
+		
+		try {
+			if (playerButler.queryp(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class)) != null) {
+				Object[] remove = playerButler.get(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class));
+				int index = -1;
+				for (int i = 0; i < playerList.size(); i++) {
+					if (playerList.get(i).getUsername().equals(remove[2])) {
+						index = i;
+					}
+				}
+				if (index != -1) {
+					playerList.remove(index);
+				}
+			}
+		} catch (InterruptedException e1) {}
 			
 			try {
 				updatePosition();

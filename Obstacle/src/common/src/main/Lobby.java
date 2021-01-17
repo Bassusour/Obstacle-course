@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
+import org.jspace.SequentialSpace;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -28,16 +30,16 @@ public class Lobby extends BasicGameState {
 	
 	RemoteSpace server;
 	RemoteSpace ready;
+	RemoteSpace playerButler;
 	
 	private int windowWidth;
 	private int windowHeight;
 	
 	List<Object []> readyList;
-	public static ArrayList<Player> playerList;
 	
 	String mouse;
 	String lobbyTitle = "LOBBY";
-	
+	ArrayList<Player> playerList;
 	Sound buttonClick;
 	
 	TrueTypeFont font2;
@@ -49,7 +51,6 @@ public class Lobby extends BasicGameState {
 	RemoteSpace players;
 	
 	Rectangle playerBox;
-
 	
 	Image readyButton;
 	Image mainMenuButton;
@@ -68,11 +69,12 @@ public class Lobby extends BasicGameState {
 		buttonClick = new Sound("res/buttonClickSound.wav");
 		mainMenuButton = new Image("res/mainMenuButton.png");
 		try {
+			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");
 			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
 			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
 			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
 		} catch (IOException e) {}
-		playerList = new ArrayList<Player>();
+		playerList = Client.playerList;
 	}
 
 	@Override
@@ -84,6 +86,7 @@ public class Lobby extends BasicGameState {
 		g.drawImage(readyButton, (windowWidth/2)-(readyButton.getWidth()), 900);
 		g.drawImage(mainMenuButton, (windowWidth/2)+10, 900);
 		g.draw(playerBox);
+		
 		
 		printPlayers(readyList, g);
 
@@ -103,6 +106,31 @@ public class Lobby extends BasicGameState {
 				playerList.add(new Player(25, false, username));
 			}
 			
+		}
+		
+		System.out.println("Player list: " + Client.playerList.toString());
+		
+		try {
+			if (playerButler.queryp(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class)) != null) {
+				Object[] remove = playerButler.get(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class));
+				int index = -1;
+				for (int i = 0; i < playerList.size(); i++) {
+					if (playerList.get(i).getUsername().equals(remove[2])) {
+						index = i;
+					}
+				}
+				if (index != -1) {
+					playerList.remove(index);
+				}
+			}
+		} catch (InterruptedException e1) {}
+		
+		for (Object[] o : readyList) {
+			if (o[0].equals(MainMenu.username) && o[1].equals("ready")) {
+				readyButton = new Image("res/unreadyButton.png");
+			} else {
+				readyButton = new Image("res/readyButton.png");
+			}
 		}
 		
 		int posX = input.getMouseX();
@@ -161,6 +189,18 @@ public class Lobby extends BasicGameState {
 	private void mainMenuClick(int posX, int posY, StateBasedGame sbg) {
 		if((posX >= (windowWidth/2)+10 && posX <= (windowWidth/2)+10+ mainMenuButton.getWidth()) && (posY >= 900 && posY <= 900 + mainMenuButton.getHeight())) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+				try {
+					playerButler.put(MainMenu.username, "remove player");
+				} catch (InterruptedException e) {}
+				int index = -1;
+				for (int i = 0; i < playerList.size(); i++) {
+					if (playerList.get(i).getUsername().equals(MainMenu.username)) {
+						index = i;
+					}
+				}
+				if (index != -1) {
+					playerList.remove(index);
+				}
 				buttonClick.play();
 				sbg.enterState(Client.MAIN_MENU);
 			}
