@@ -95,6 +95,7 @@ public class Lobby extends BasicGameState {
 		
 		for (int i = 0; i < readyList.size(); i++) {
 			String username = readyList.get(i)[0].toString();
+			//System.out.println(username);
 			if(!hasPlayer(username)) {
 				playerList.add(new Player(25, false, username));
 			}
@@ -117,7 +118,6 @@ public class Lobby extends BasicGameState {
 		} catch (InterruptedException e) {}
 		
 		if(allReady != null) {
-			System.out.println("Should start");
 			playerList.get((int) allReady[1]).setEnemy(true);
 			sbg.enterState(Client.GAME);
 		}
@@ -148,6 +148,7 @@ public class Lobby extends BasicGameState {
 		if((posX >= (windowWidth/2)-(readyButton.getWidth()) && posX <= (windowWidth/2) && (posY >= 900 && posY <= 900 + readyButton.getHeight()))) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				try {
+					//System.out.println(MainMenu.username);
 					ready.put(MainMenu.username, "change ready", "poop");
 				} catch (InterruptedException e) {}
 				buttonClick.play();

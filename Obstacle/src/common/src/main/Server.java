@@ -15,11 +15,10 @@ import org.jspace.SpaceRepository;
 
 class Server {
 	public static final String IP = "127.0.0.1:9001";
-	public static HashMap<String, SequentialSpace> players;
+	public static HashMap<String, SequentialSpace> players = new HashMap<String, SequentialSpace>();
 	
 	//Main thread creates spaces and starts other threads
     public static void main(String[] args) {
-    	players = new HashMap<String, SequentialSpace>();
     	
 //    	players.put("init", new SequentialSpace());
     	
@@ -76,11 +75,13 @@ class PlayerController implements Runnable {
 					String username = create[0].toString();
 					if (!players.containsKey(username)) {
 						players.put(username, playerSpace);
-						playerSpace.put("role", "good guy");
+						//playerSpace.put("role", "good guy");
 						
 						ready.put(username, "not ready");
+						playerButler.put("successfully created", "response to client");
 					} else {
-						playerButler.put(username, "user exists");
+						System.out.println("player already exists");
+						playerButler.put(playerButler.put("player already exists", "response to client"));
 					}
 				}
 				
