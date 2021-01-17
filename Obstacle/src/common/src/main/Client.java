@@ -27,7 +27,7 @@ public class Client extends StateBasedGame {
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
 	
-	public static final String IP = "127.0.0.1:9001";
+	public static final String IP = "25.74.68.220:9001";
 	
 	public static ArrayList<Player> playerList;
 

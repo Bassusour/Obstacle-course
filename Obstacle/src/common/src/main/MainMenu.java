@@ -29,7 +29,7 @@ public class MainMenu extends BasicGameState {
 	Image createButton;
 	Image desktopButton;
 	TrueTypeFont font;
-	private boolean createdPlayer;
+	public static boolean createdPlayer;
 
 	RemoteSpace playerButler;
 
@@ -107,10 +107,11 @@ public class MainMenu extends BasicGameState {
 		while (!createdPlayer) {
 			c++;
 			try {
-				if(!loop) { playerButler.put(username, "create player");}
+				if(!loop) { System.out.println("created"); playerButler.put(username, "create player");}
 				
 				Object[] response = playerButler.get(new FormalField(String.class), new ActualField("response to client"));
 				if (response[0].equals("player already exists")) {
+					System.out.println("exists");
 					username = username + "(" + c + ")";
 					playerButler.put(username, "create player");
 					loop = true;

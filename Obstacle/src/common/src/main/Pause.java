@@ -122,6 +122,7 @@ public class Pause extends BasicGameState {
 					playerList.remove(index);
 				}
 				buttonClick.play();
+				MainMenu.createdPlayer= false;
 				sbg.enterState(Client.MAIN_MENU);
 			}
 		}

@@ -105,7 +105,6 @@ public class Lobby extends BasicGameState {
 			
 		}
 		
-		System.out.println("Player list: " + Client.playerList.toString());
 		
 		try {
 			if (playerButler.queryp(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class)) != null) {
@@ -145,8 +144,11 @@ public class Lobby extends BasicGameState {
 			allReady = ready.queryp(new ActualField("all ready"), new FormalField(Integer.class));
 		} catch (InterruptedException e) {}
 		
+		System.out.println("Lobby Player list: " + playerList.toString());
+		
 		if(allReady != null) {
 			playerList.get((int) allReady[1]).setEnemy(true);
+			Game.createdPlayer = false;
 			sbg.enterState(Client.GAME);
 		}
 
@@ -176,7 +178,6 @@ public class Lobby extends BasicGameState {
 		if((posX >= (windowWidth/2)-(readyButton.getWidth()) && posX <= (windowWidth/2) && (posY >= 900 && posY <= 900 + readyButton.getHeight()))) {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				try {
-					//System.out.println(MainMenu.username);
 					ready.put(MainMenu.username, "change ready", "poop");
 				} catch (InterruptedException e) {}
 				buttonClick.play();
@@ -200,6 +201,7 @@ public class Lobby extends BasicGameState {
 					playerList.remove(index);
 				}
 				buttonClick.play();
+				MainMenu.createdPlayer = false;
 				sbg.enterState(Client.MAIN_MENU);
 			}
 		}

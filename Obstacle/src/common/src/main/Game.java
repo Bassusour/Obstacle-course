@@ -36,7 +36,7 @@ public class Game extends BasicGameState {
 	
 	String username = MainMenu.username;
 	
-	private boolean createdPlayer = false;
+	public static boolean createdPlayer = false;
 
 	@Override
 	public void init(GameContainer gc,  StateBasedGame sbg) throws SlickException {
@@ -105,8 +105,6 @@ public class Game extends BasicGameState {
 	@Override
 	public void update(GameContainer con, StateBasedGame sbg,  int arg1) throws SlickException {
 		Input input = con.getInput();
-		
-//		System.out.println("Player list: " + playerList.toString());
 		
 		if(!createdPlayer) {
 			for (Player player : playerList) {
@@ -220,6 +218,8 @@ public class Game extends BasicGameState {
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 			sbg.enterState(Client.PAUSE);
 		}
+		
+		System.out.println("Game Player list: " + playerList.toString());
 	}
 	
 	private void drawPlayers(Graphics g, GameContainer container) {
@@ -235,7 +235,6 @@ public class Game extends BasicGameState {
 
 	public void updatePosition() throws InterruptedException  {
 			positionButler.put(player.getUsername(), player.getX(), player.getY(), "give position");
-			//System.out.println("Sent coordinates to server from " + mainPlayer);
 			if(positionButler.queryp(new ActualField(MainMenu.username), new FormalField(String.class), new FormalField(Float.class), new FormalField (Float.class)) != null) {
 				Object[] pos = positionButler.get(new ActualField(MainMenu.username), new FormalField(String.class), new FormalField(Float.class), new FormalField (Float.class));
 				for (Player player : playerList) {

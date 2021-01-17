@@ -14,7 +14,7 @@ import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 
 class Server {
-	public static final String IP = "127.0.0.1:9001";
+	public static final String IP = "25.74.68.220:9001";
 	public static HashMap<String, SequentialSpace> players = new HashMap<String, SequentialSpace>();
 	
 	//Main thread creates spaces and starts other threads
@@ -98,7 +98,7 @@ class PlayerController implements Runnable {
 				if (remove != null) {
 					players.remove(remove[0]);
 					ready.get(new ActualField(remove[0]), new FormalField(String.class));
-					ready.getp(new ActualField("all ready"));
+					ready.getp(new ActualField("all ready"), new FormalField(Integer.class));
 					for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
 						if(!entry.getKey().equals(remove[0])) {
 							playerButler.put(entry.getKey(), "remove other player", remove[0]);
@@ -148,15 +148,13 @@ class ReadyController implements Runnable {
 			
 			 //assigns a random player to enemy
 			 try {
-				if (allReady && ready.queryp(new ActualField("all ready")) == null) {
+				if (allReady && ready.queryp(new ActualField("all ready"), new FormalField(Integer.class)) == null) {
 					Random r = new Random();
 					int rn = r.nextInt(readyList.size());
 					ready.put("all ready", rn);
 				 }
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			} catch (InterruptedException e) {}
+			 
 		}
 		
 	}
