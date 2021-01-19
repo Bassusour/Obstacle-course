@@ -63,16 +63,18 @@ public class Client extends StateBasedGame {
 			
 //			System.out.println("Enter port number");
 //			String port = reader.readLine();
+			String port = "9001";
 			
 			server.put("getPlayerCount");
 			playerCount = (int)(server.get(new FormalField(Integer.class), new FormalField(String.class)))[0]; //gets current player count from server
+			
 			inbox = new RemoteSpace("tcp://" + IP + "/player" + playerCount + "?keep");
             
             System.out.println("Sucessfully setup");
             
             AppGameContainer app = new AppGameContainer(new Client("Title"+playerCount));
 
-            app.setDisplayMode(WIDTH, HEIGHT, false);
+            app.setDisplayMode(WIDTH, HEIGHT, true);
             app.setShowFPS(true); // true for display the numbers of FPS
             app.setVSync(true); // false for disable the FPS synchronize
             app.start();

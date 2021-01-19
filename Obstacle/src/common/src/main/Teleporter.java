@@ -18,13 +18,12 @@ public class Teleporter {
 			new Teleporter(15, 550, 550),
 			new Teleporter(15, 750, 30),
 			new Teleporter(15, 750, 750),
-			new Teleporter(15, 750, 950),
+			new Teleporter(15, 950, 550),
 			new Teleporter(15, 1770, 550),
 			new Teleporter(15, 1770, 350)
 	};
 	
 	public Teleporter(int size, int X, int Y) {
-		new Circle(X, Y, size, size);
 		this.shape = new Circle(X, Y, size, size);
 		this.size = size;
 		this.X = X;
@@ -46,5 +45,5 @@ public class Teleporter {
 	public int getY() {
 		return Y;
 	}
-
+	
 }

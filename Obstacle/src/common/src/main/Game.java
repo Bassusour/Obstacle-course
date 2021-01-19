@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.jspace.ActualField;
 import org.jspace.FormalField;
@@ -15,7 +17,9 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Triangulator;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -32,7 +36,7 @@ public class Game extends BasicGameState {
 	private String mainPlayer;
 	private Player[] playersArr = new Player[10];
 	private Client client;
-	private boolean go = true; //false if multiplayer
+	private boolean go = false; //false if multiplayer
 	private static int playerCount = 0;
 	public static final int ID = 1;
 	Image background;
@@ -43,6 +47,10 @@ public class Game extends BasicGameState {
 	private Player player;
 	private Path path;
 	private Room room;
+	private long time;
+	private long teleporterCooldown = 0;
+	
+	private boolean button1 = false;
 	
 	String username = MainMenu.username;
 	
@@ -56,10 +64,8 @@ public class Game extends BasicGameState {
 	@Override
 	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
 		try {
-			System.out.println(playerCount + "test");
 			mainPlayer = "player"+playerCount;
 			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
-
 			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
 			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
 			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
@@ -68,7 +74,7 @@ public class Game extends BasicGameState {
 			
 		} catch (IOException | InterruptedException e) { }
 		path = new Path(Path.PATH_ONE_HORIZONTAL, Path.PATH_ONE_VERTICAL);
-		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS);
+		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS, Button.PATH_ONE_BUTTONS);
 		
 	}
 
@@ -101,11 +107,9 @@ public class Game extends BasicGameState {
 		graphics.fill(new Rectangle(1720, 800, 100, 100));
 		graphics.fill(new Rectangle(1200, 700, 100, 200));
 		
-		if(createPlayers) {
-			for (int i = 0; i < allPlayers.size(); i++) {
-				graphics.setColor(playersArr[i+1].getColor());
-				graphics.fill(playersArr[i+1].getShape());
-			}
+		for (int i = 0; i < Button.PATH_ONE_BUTTONS.length; i++) {
+			graphics.setColor(Color.red);
+			graphics.fill(room.getButtonElement(i));
 		}
 		
 		graphics.setColor(Color.orange);
@@ -119,9 +123,6 @@ public class Game extends BasicGameState {
 		//graphics.setColor(player.getColor());
 		//graphics.fill(player.getShape());
 
-		
-
-		
 		graphics.setColor(Color.white);
 		
 		for (int i = 0; i < path.getHorizontal().length; i++) {
@@ -133,7 +134,6 @@ public class Game extends BasicGameState {
 		}
 		
 		if(createPlayers) {
-			System.out.println(playersArr[0] + ", " + playersArr[1] + ", " + playersArr[2] + ", " + playersArr[3]);
 			for (int i = 0; i < allPlayers.size(); i++) {
 				//System.out.println("null at player " + (i+1));
 				graphics.setColor(playersArr[i+1].getColor());
@@ -141,14 +141,43 @@ public class Game extends BasicGameState {
 			}
 		}
 		
+		for (int i = 0; i < Button.PATH_ONE_BUTTONS.length; i++) {
+			
+			Button button = Button.PATH_ONE_BUTTONS[i];
+			
+			if (button.isPressed() || button.inUse()) {
+				
+				if (i < 5) {
+					Trap.setBombs(graphics, time, button);
+				} else if (i < 8){
+					Trap.setBullets(graphics, time, button);
+				} else {
+					Trap.setSuperbombs(graphics, time, button);
+				}
+				
+				button.unpressed();
+				
+			}
+		}
+	
+		
+		
 	}
 
 	@Override
 	public void update(GameContainer con, StateBasedGame sbg,  int arg1) throws SlickException {
+		
+		time = System.currentTimeMillis();
+		
 		Input input = con.getInput();
 		
+		int speed;
 		
-		
+		if (player.isEnemy()) {
+			speed = 10;
+		} else {
+			speed = 5;
+		}
 		
 		if(go) { //Waits for all clients to synchronize
 			
@@ -157,31 +186,51 @@ public class Game extends BasicGameState {
 			} catch (InterruptedException e) { }
 			
 			if (input.isKeyDown(Input.KEY_W)) {
-				player.setY(player.getY() - 5);
+				player.setY(player.getY() - speed);
 			}
 			
 			if (input.isKeyDown(Input.KEY_S)) {
-				player.setY(player.getY() + 5);
+				player.setY(player.getY() + speed);
 			}
 			
 			if (input.isKeyDown(Input.KEY_A)) {
-				player.setX(player.getX() - 5);
+				player.setX(player.getX() - speed);
 			}
 			
 			if (input.isKeyDown(Input.KEY_D)) {
-				player.setX(player.getX() + 5);
+				player.setX(player.getX() + speed);
 			}
 			
-			for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
-				Teleporter teleporter = Teleporter.PATH_ONE_TELEPORTERS[i];
-				if (player.getShape().intersects(teleporter.getShape()) && input.isKeyPressed(Input.KEY_E)) {
-						if (i % 2 == 0) {
-							player.setX(Teleporter.PATH_ONE_TELEPORTERS[i+1].getX() - player.getSize() / 2);
-							player.setY(Teleporter.PATH_ONE_TELEPORTERS[i+1].getY() - player.getSize() / 2);
-						} else {
-							player.setX(Teleporter.PATH_ONE_TELEPORTERS[i-1].getX() - player.getSize() / 2);
-							player.setY(Teleporter.PATH_ONE_TELEPORTERS[i-1].getY() - player.getSize() / 2);
+			for (int i = 0; i < Button.PATH_ONE_BUTTONS.length; i++) {
+				Button button = Button.PATH_ONE_BUTTONS[i];
+				if (player.getShape().intersects(button.getShape())) {
+					if (time > button.getCooldown()) {
+						if (input.isKeyDown(Input.KEY_E)) {
+							button.pressed();
+							button.setCooldown(time + 10000);
 						}
+					}
+				}
+			}
+			
+			if (time > teleporterCooldown) {
+				for (int i = 0; i < Teleporter.PATH_ONE_TELEPORTERS.length; i++) {
+					Teleporter teleporter = Teleporter.PATH_ONE_TELEPORTERS[i];
+					if (player.getShape().intersects(teleporter.getShape())) {
+						if (input.isKeyDown(Input.KEY_E)) {
+							if (i % 2 == 0) {
+								player.setX(Teleporter.PATH_ONE_TELEPORTERS[i+1].getX() - player.getSize() / 2);
+								player.setY(Teleporter.PATH_ONE_TELEPORTERS[i+1].getY() - player.getSize() / 2);
+								teleporterCooldown = time + (1 * 1000);
+								break;
+							} else {
+								player.setX(Teleporter.PATH_ONE_TELEPORTERS[i-1].getX() - player.getSize() / 2);
+								player.setY(Teleporter.PATH_ONE_TELEPORTERS[i-1].getY() - player.getSize() / 2);
+								teleporterCooldown = time + (1 * 1000);
+								break;
+							}
+						}
+					}
 				}
 			}
 			
@@ -196,18 +245,18 @@ public class Game extends BasicGameState {
 				if (i < 16) {
 					if (player.getShape().intersects(path.getHorizontalElement(i))) {
 						if(player.isEnemy()) {
-							player.setY(player.getY() + 5);
+							player.setY(player.getY() + speed);
 						} else {
-							player.setY(player.getY() - 5);
+							player.setY(player.getY() - speed);
 						}
 					}
 				// North bound
 				} else {
 					if (player.getShape().intersects(path.getHorizontalElement(i))) {
 						if(player.isEnemy()) {
-							player.setY(player.getY() - 5);
+							player.setY(player.getY() - speed);
 						} else {
-							player.setY(player.getY() + 5);
+							player.setY(player.getY() + speed);
 						}
 					}
 				}	
@@ -218,18 +267,18 @@ public class Game extends BasicGameState {
 				if (i < 13) {
 					if (player.getShape().intersects(path.getVerticalElement(i))) {
 						if(player.isEnemy()) {
-							player.setX(player.getX() - 5);
+							player.setX(player.getX() - speed);
 						} else {
-							player.setX(player.getX() + 5);
+							player.setX(player.getX() + speed);
 						}
 					}
 				// East bound
 				} else {
 					if (player.getShape().intersects(path.getVerticalElement(i))) {
 						if(player.isEnemy()) {
-							player.setX(player.getX() + 5);
+							player.setX(player.getX() + speed);
 						} else {
-							player.setX(player.getX() - 5);
+							player.setX(player.getX() - speed);
 						}
 					}
 				}
@@ -262,23 +311,20 @@ public class Game extends BasicGameState {
 				role = true;
 			}
 			
-			System.out.println(allPlayers.get(i)[0]);
-			
 			/*
 			 * "player1", "bad guy"
 			 * "player2", "bad guy"
 			 */
 			
 			if(allPlayers.get(i)[0].equals(mainPlayer)) {
-				System.out.println("Skipped itself as " + mainPlayer);
 				continue; //Should not create itself
 			} else {
 				playersArr[i+1] = new Player(25, role);
-				System.out.println("Created player"+(i+1) + " where i is " + i);
 			}
 		}
 	}
 	private void createPlayer() throws InterruptedException {
+		/*
 		if(Math.random() >= 0.5) {
 			server.put(mainPlayer, "bad guy", "createPlayer");
 			ready.put(mainPlayer, "not ready");
@@ -292,6 +338,12 @@ public class Game extends BasicGameState {
 			playersArr[playerCount] = player;
 			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
 		}
+		*/
+		server.put(mainPlayer, "bad guy", "createPlayer");
+		ready.put(mainPlayer, "not ready");
+		player = new Player(25,true);
+		playersArr[playerCount] = player;
+		
 	}
 
 	public void updatePosition() throws InterruptedException  {

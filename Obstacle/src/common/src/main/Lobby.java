@@ -91,7 +91,6 @@ public class Lobby extends BasicGameState {
 	public void update(GameContainer gc, StateBasedGame sbg, int arg2) throws SlickException {
 		input = gc.getInput();
 		
-
 		try {
 			reaadyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
 		} catch (InterruptedException e) {}

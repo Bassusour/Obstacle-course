@@ -13,7 +13,7 @@ import org.jspace.Space;
 import org.jspace.SpaceRepository;
 
 class Server {
-	private static boolean sync = true; //false if multiplayer
+	private static boolean sync = false; //false if multiplayer
 	
 	private static final String IP = "127.0.0.1:9001";
 	
@@ -21,7 +21,6 @@ class Server {
     public static void main(String[] args) {
     	try {
     		SpaceRepository repo = new SpaceRepository();
-
     		repo.addGate("tcp://" + IP + "/?keep");
     		
     		SequentialSpace players = new SequentialSpace();
@@ -46,12 +45,11 @@ class Server {
     		SequentialSpace player6 = new SequentialSpace();
     		repo.add("player6", player6);
 ;
+    		
     		new Thread(new PlayerCountChecker(IP)).start();
     		new Thread(new PlayerRoles(IP)).start();
     		
     		SequentialSpace[] arrPlayersSpaces = {player1, player2, player3, player4, player5, player6};
-    		
-    		System.out.println("Created spaces");
 			
 			while(true) {
 				
@@ -86,9 +84,7 @@ class Server {
 					} else if(notReadyPlayer == null && ready.size() >= 1) {
 						for(int i = 0; i < players.size(); i++) {
 							//sends go signal to all connected players
-							System.out.println("Size is " + players.size());
 							arrPlayersSpaces[i].put("go");
-							System.out.println("Sent go to player" + (i+1));
 						}
 						sync = true;
 					}
@@ -172,22 +168,16 @@ class PlayerRoles implements Runnable {
         			}*/
         			//player1, good guy, not ready
         			players.put(t[0], t[1]);
-        			System.out.println("put " + t[0]);
     			}
     			
     			//changes ready state of a client
     			if(server.queryp(new FormalField(String.class), new FormalField(String.class), new ActualField("changeReady")) != null) {
-    				System.out.println("Changing ready");
     				Object[] input = server.get(new FormalField(String.class), new FormalField(String.class), new ActualField("changeReady"));
-    				System.out.println("Got input");
     				ready.get(new ActualField(input[0]), new FormalField(String.class));
-    				System.out.println("Removed old ready");
     				if(input[1].equals("ready")) {
     					ready.put(input[0], "ready");
-    					System.out.println("Updated " + input[0] + " to ready");
     				} else if(input[1].equals("not ready")) {
     					ready.put(input[0], "not ready");
-    					System.out.println("Updated " + input[0] + " to not ready");
     				}
     			}
     			
