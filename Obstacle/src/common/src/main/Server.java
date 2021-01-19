@@ -36,6 +36,9 @@ class Server {
 		
 		SequentialSpace positionButler = new SequentialSpace();
 		repo.add("positionButler", positionButler);
+		
+		SequentialSpace trapButler = new SequentialSpace();
+		repo.add("trapButler", trapButler);
 
 		new Thread(new PlayerController()).start();
 		new Thread(new ReadyController()).start();
@@ -144,7 +147,7 @@ class ReadyController implements Runnable {
 			try {
 				readyList = ready.queryAll(new FormalField(String.class), new FormalField(String.class));
 			} catch (InterruptedException e1) {}
-			allReady = checkReady(readyList);
+			allReady = checkAllReady(readyList);
 			
 			 //assigns a random player to enemy
 			 try {
@@ -159,7 +162,7 @@ class ReadyController implements Runnable {
 		
 	}
 	
-	public boolean checkReady(List<Object[]> readyList) {
+	public boolean checkAllReady(List<Object[]> readyList) {
 		
 		int count = 0;
 		
@@ -219,4 +222,27 @@ class PositionController implements Runnable {
 		}
 	}
 
+}
+
+class TrapController implements Runnable {
+
+	RemoteSpace trapButler;
+	Map<String, SequentialSpace> players;
+	
+	
+	@Override
+	public void run() {
+		
+		try {
+			trapButler = new RemoteSpace("tcp://" + Server.IP + "/trapButler?keep");
+		} catch (IOException e) {}
+		players = Server.players; 
+		 
+		 
+		while (!false) {
+			
+		}
+		
+	}
+	
 }
