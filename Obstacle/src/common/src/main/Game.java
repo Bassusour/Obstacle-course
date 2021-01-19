@@ -1,10 +1,11 @@
 package common.src.main;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -25,19 +26,10 @@ import org.newdawn.slick.state.StateBasedGame;
 
 public class Game extends BasicGameState {
 	
-	private RemoteSpace inbox;
-	private RemoteSpace server;
-	private RemoteSpace ready;
+	private RemoteSpace positionButler;
+	RemoteSpace playerButler;
 
-	private RemoteSpace players;
-	private List<Object[]> allPlayers;
-	private boolean createPlayers = false;
-
-	private String mainPlayer;
-	private Player[] playersArr = new Player[10];
-	private Client client;
-	private boolean go = false; //false if multiplayer
-	private static int playerCount = 0;
+	ArrayList<Player> playerList;
 	public static final int ID = 1;
 	Image background;
 	
@@ -54,25 +46,17 @@ public class Game extends BasicGameState {
 	
 	String username = MainMenu.username;
 	
-	private boolean collision = false;
-
-	public Game(int playerCount, RemoteSpace inbox) {
-		this.inbox = inbox;
-		this.playerCount = playerCount;
-	}
+	public static boolean createdPlayer = false;
 
 	@Override
-	public void init(GameContainer arg0,  StateBasedGame sbg) throws SlickException {
+	public void init(GameContainer gc,  StateBasedGame sbg) throws SlickException {
+		gc.setAlwaysRender(true);
 		try {
-			mainPlayer = "player"+playerCount;
-			//inbox = new RemoteSpace("tcp://127.0.0.1:9001/player" + playerCount + "?keep");
-			server = new RemoteSpace("tcp://" + Client.IP + "/server?keep");
-			players = new RemoteSpace("tcp://" + Client.IP + "/players?keep");
-			ready = new RemoteSpace("tcp://" + Client.IP + "/ready?keep");
-			
-			createPlayer();
-			
-		} catch (IOException | InterruptedException e) { }
+			positionButler = new RemoteSpace("tcp://" + Client.IP + "/positionButler?keep");
+			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");			
+		} catch (IOException e) { }
+		playerList = Client.playerList;
+		
 		path = new Path(Path.PATH_ONE_HORIZONTAL, Path.PATH_ONE_VERTICAL);
 		room = new Room(player, path, Teleporter.PATH_ONE_TELEPORTERS, Button.PATH_ONE_BUTTONS);
 		
@@ -118,11 +102,6 @@ public class Game extends BasicGameState {
 			graphics.fill(room.getTeleportElement(i));
 		}
 		
-
-		graphics.drawString(MainMenu.username, (player.getX() + player.getSize()/2) - (container.getDefaultFont().getWidth(MainMenu.username)/2), player.getY()-20);
-		//graphics.setColor(player.getColor());
-		//graphics.fill(player.getShape());
-
 		graphics.setColor(Color.white);
 		
 		for (int i = 0; i < path.getHorizontal().length; i++) {
@@ -133,13 +112,7 @@ public class Game extends BasicGameState {
 			graphics.fill(path.getVerticalElement(i));
 		}
 		
-		if(createPlayers) {
-			for (int i = 0; i < allPlayers.size(); i++) {
-				//System.out.println("null at player " + (i+1));
-				graphics.setColor(playersArr[i+1].getColor());
-				graphics.fill(playersArr[i+1].getShape());
-			}
-		}
+		drawPlayers(graphics, container);
 		
 		for (int i = 0; i < Button.PATH_ONE_BUTTONS.length; i++) {
 			
@@ -171,16 +144,41 @@ public class Game extends BasicGameState {
 		
 		Input input = con.getInput();
 		
+
 		int speed;
-		
+
+		if(!createdPlayer) {
+			for (Player player : playerList) {
+				if (player.getUsername().equals(MainMenu.username)) {
+					this.player = player;
+				}
+			}
+			createdPlayer = true;
+		}
+
+
 		if (player.isEnemy()) {
 			speed = 10;
 		} else {
 			speed = 5;
 		}
 		
-		if(go) { //Waits for all clients to synchronize
-			
+		
+		try {
+			if (playerButler.queryp(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class)) != null) {
+				Object[] remove = playerButler.get(new ActualField(MainMenu.username), new ActualField("remove other player"), new FormalField(String.class));
+				int index = -1;
+				for (int i = 0; i < playerList.size(); i++) {
+					if (playerList.get(i).getUsername().equals(remove[2])) {
+						index = i;
+					}
+				}
+				if (index != -1) {
+					playerList.remove(index);
+				}
+			}
+		} catch (InterruptedException e1) {}
+		
 			try {
 				updatePosition();
 			} catch (InterruptedException e) { }
@@ -283,87 +281,35 @@ public class Game extends BasicGameState {
 					}
 				}
 			}
-			
-		} else {
-			try {
-				server.put(mainPlayer, "ready", "changeReady");
-				inbox.get(new ActualField ("go"));
-				getPlayers();
-				go = true;
-				createPlayers = true;
-			} catch (InterruptedException e) { }
-		}
 		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 			sbg.enterState(Client.PAUSE);
 		}
+		
+		System.out.println("Game Player list: " + playerList.toString());
 	}
 	
-	//"player1", "good guy", "not ready"
-	private void getPlayers() throws InterruptedException {
-		allPlayers = players.queryAll(new FormalField(String.class), new FormalField(String.class));
+	private void drawPlayers(Graphics g, GameContainer container) {
 		
-		for (int i = 0; i < allPlayers.size(); i++) {
-			boolean role = true;
-			if(allPlayers.get(i)[1].equals("good guy")) {
-				role = false;
-			} else {
-				role = true;
-			}
-			
-			/*
-			 * "player1", "bad guy"
-			 * "player2", "bad guy"
-			 */
-			
-			if(allPlayers.get(i)[0].equals(mainPlayer)) {
-				continue; //Should not create itself
-			} else {
-				playersArr[i+1] = new Player(25, role);
-			}
+
+		for (Player player : playerList) {
+			g.setColor(player.getColor());
+			g.fill(player.getShape());
+			g.drawString(player.getUsername(), (player.getX() + player.getSize()/2) - (container.getDefaultFont().getWidth(MainMenu.username)/2), player.getY()-20);
 		}
-	}
-	private void createPlayer() throws InterruptedException {
-		/*
-		if(Math.random() >= 0.5) {
-			server.put(mainPlayer, "bad guy", "createPlayer");
-			ready.put(mainPlayer, "not ready");
-			player = new Player(25,true);
-			playersArr[playerCount] = player;
-			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
-		} else {
-			server.put(mainPlayer, "good guy", "createPlayer");
-			ready.put(mainPlayer, "not ready");
-			player = new Player(25,false);
-			playersArr[playerCount] = player;
-			System.out.println("Put player"+playerCount+" in array index " + (playerCount));
-		}
-		*/
-		server.put(mainPlayer, "bad guy", "createPlayer");
-		ready.put(mainPlayer, "not ready");
-		player = new Player(25,true);
-		playersArr[playerCount] = player;
 		
+
 	}
 
 	public void updatePosition() throws InterruptedException  {
-			server.put(player.getX(), player.getY(), mainPlayer);
-			//System.out.println("Sent coordinates to server from " + mainPlayer);
-			if(inbox.queryp(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos")) != null) {
-				Object[] t = inbox.get(new FormalField(Float.class), new FormalField(Float.class), new FormalField(String.class), new ActualField ("Pos"));
-				//Can never get position of itself from server
-				if(t[2].equals("player1")) {
-					playersArr[1].setX((float) t[0]);
-					playersArr[1].setY((float) t[1]);
-				} else if(t[2].equals("player2")) {
-					playersArr[2].setX((float) t[0]);
-					playersArr[2].setY((float) t[1]);
-				} else if(t[2].equals("player3")) {
-					playersArr[3].setX((float) t[0]);
-					playersArr[3].setY((float) t[1]);
-				} else if(t[2].equals("player4")) {
-					playersArr[4].setX((float) t[0]);
-					playersArr[4].setY((float) t[1]);
+			positionButler.put(player.getUsername(), player.getX(), player.getY(), "give position");
+			if(positionButler.queryp(new ActualField(MainMenu.username), new FormalField(String.class), new FormalField(Float.class), new FormalField (Float.class)) != null) {
+				Object[] pos = positionButler.get(new ActualField(MainMenu.username), new FormalField(String.class), new FormalField(Float.class), new FormalField (Float.class));
+				for (Player player : playerList) {
+					if (player.getUsername().equals(pos[1].toString())) {
+						player.setX((float) pos[2]);
+						player.setY((float) pos[3]);
+					}
 				}
 			}
 		}
