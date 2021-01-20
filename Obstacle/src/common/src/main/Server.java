@@ -14,7 +14,7 @@ import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 
 class Server {
-	public static final String IP = "25.74.68.220:9001";
+	public static final String IP = "127.0.0.1:9001";
 	public static HashMap<String, SequentialSpace> players = new HashMap<String, SequentialSpace>();
 	
 	//Main thread creates spaces and starts other threads

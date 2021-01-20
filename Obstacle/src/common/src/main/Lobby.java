@@ -144,7 +144,7 @@ public class Lobby extends BasicGameState {
 			allReady = ready.queryp(new ActualField("all ready"), new FormalField(Integer.class));
 		} catch (InterruptedException e) {}
 		
-		System.out.println("Lobby Player list: " + playerList.toString());
+		//System.out.println("Lobby Player list: " + playerList.toString());
 		
 		if(allReady != null) {
 			playerList.get((int) allReady[1]).setEnemy(true);
