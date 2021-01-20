@@ -47,6 +47,7 @@ public class Game extends BasicGameState {
 	private long time;
 	private Goal goal = new Goal();
 	private long teleporterCooldown = 0;
+	private int lives = 10;
 	
 	private boolean button1 = false;
 	
@@ -293,8 +294,49 @@ public class Game extends BasicGameState {
 				}
 			}
 			
+			for (int i = 0; i < Button.PATH_ONE_BUTTONS.length; i++) {
+				Button button = Button.PATH_ONE_BUTTONS[i];
+				if ((!button.isPressed()) && button.inUse()) {
+					if (i < 5) {
+						for (Bomb bomb : Trap.bombs) {
+							if (player.getShape().intersects(bomb.getShape())) {
+								if (bomb.getColor() == Color.red) {
+									lives = lives - 1;
+									player.setX(30);
+									player.setY(37);
+								}
+							}
+						}
+					} else if (i < 8) {
+						for (Bomb bomb : Trap.bullets) {
+							if (player.getShape().intersects(bomb.getShape())) {
+								if (bomb.getColor() == Color.red) {
+									lives = lives - 1;
+									player.setX(30);
+									player.setY(37);
+								}
+							}
+						}
+					} else {
+						for (Bomb bomb : Trap.superbombs) {
+							if (player.getShape().intersects(bomb.getShape())) {
+								if (bomb.getColor() == Color.red) {
+									lives = lives - 1;
+									player.setX(30);
+									player.setY(37);
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			if (player.getX() < goal.getX() && player.getY() > goal.getY()) {
 				System.out.println("Black Wins");
+			}
+			
+			if (lives == 0) {
+				System.out.println("Red Wins");
 			}
 			
 			if (player.getX() < 0) { player.setX(0); }
