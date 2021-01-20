@@ -39,11 +39,15 @@ class Server {
 		
 		SequentialSpace trapButler = new SequentialSpace();
 		repo.add("trapButler", trapButler);
+		
+		SequentialSpace winButler = new SequentialSpace();
+		repo.add("winButler", winButler);
 
 		new Thread(new PlayerController()).start();
 		new Thread(new ReadyController()).start();
 		new Thread(new PositionController()).start();
 		new Thread(new TrapController()).start();
+		new Thread(new WinController()).start();
 		
 		System.out.println("Created spaces");
 
@@ -249,6 +253,34 @@ class TrapController implements Runnable {
 				for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
 					if (!entry.getKey().equals(trap[0])) {
 						trapButler.put(entry.getKey(), "trigger trap", trap[2].toString(), (int) trap[3]);
+					}
+				}
+				
+			} catch (InterruptedException e) {}
+		}
+		
+	}
+	
+}
+
+class WinController implements Runnable {
+
+	RemoteSpace winButler;
+	Map<String, SequentialSpace> players;
+	
+	@Override
+	public void run() {
+		players = Server.players;
+		try {
+			winButler = new RemoteSpace("tcp://" + Server.IP + "/winButler?keep");
+		} catch (IOException e) {}
+		
+		while (!false) {
+			try {
+				Object[] win = winButler.get(new ActualField("win"),new FormalField(String.class), new FormalField(String.class));
+				for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
+					if (!entry.getKey().equals(win[1])) {
+						winButler.put(entry.getKey(), "win", win[2].toString());
 					}
 				}
 				

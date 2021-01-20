@@ -29,6 +29,7 @@ public class Game extends BasicGameState {
 	private RemoteSpace positionButler;
 	RemoteSpace playerButler;
 	RemoteSpace trapButler;
+	RemoteSpace winButler;
 
 	ArrayList<Player> playerList;
 	public static final int ID = 1;
@@ -45,9 +46,12 @@ public class Game extends BasicGameState {
 	private Path path;
 	private Room room;
 	private long time;
+	private Goal goal = new Goal();
 	private long teleporterCooldown = 0;
 	
 	private boolean button1 = false;
+	
+	public static String winTitle = "";
 	
 	String username = MainMenu.username;
 	
@@ -59,7 +63,8 @@ public class Game extends BasicGameState {
 		try {
 			positionButler = new RemoteSpace("tcp://" + Client.IP + "/positionButler?keep");
 			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");	
-			trapButler = new RemoteSpace("tcp://" + Client.IP + "/trapButler?keep");	
+			trapButler = new RemoteSpace("tcp://" + Client.IP + "/trapButler?keep");
+			winButler = new RemoteSpace("tcp://" + Client.IP + "/winButler?keep");
 		} catch (IOException e) { }
 		playerList = Client.playerList;
 		
@@ -96,6 +101,29 @@ public class Game extends BasicGameState {
 		graphics.fill(new Rectangle(1720, 600, 100, 100));
 		graphics.fill(new Rectangle(1720, 800, 100, 100));
 		graphics.fill(new Rectangle(1200, 700, 100, 200));
+		
+		for (int i = 0; i < goal.getPattern().length; i++) {
+			
+			if (i < 8 || i > 15) {
+				
+				if (i % 2 == 0) {
+					graphics.setColor(Color.black);
+				} else {
+					graphics.setColor(Color.decode("#F7DFD3"));
+				}
+				
+			} else {
+				
+				if (i % 2 == 0) {
+					graphics.setColor(Color.decode("#F7DFD3"));
+				} else {
+					graphics.setColor(Color.black);
+				}
+				
+			}
+			
+			graphics.fill(goal.getPattern()[i]);
+		}
 		
 		for (int i = 0; i < Button.PATH_ONE_BUTTONS.length; i++) {
 			graphics.setColor(Color.red);
@@ -182,7 +210,6 @@ public class Game extends BasicGameState {
 		
 		Input input = con.getInput();
 		
-
 		int speed;
 
 		if(!createdPlayer) {
@@ -196,7 +223,7 @@ public class Game extends BasicGameState {
 
 
 		if (player.isEnemy()) {
-			speed = 10;
+			speed = 7;
 		} else {
 			speed = 5;
 		}
@@ -270,6 +297,25 @@ public class Game extends BasicGameState {
 				}
 			}
 			
+			if (player.getX() < goal.getX() && player.getY() > goal.getY()) {
+				winTitle = "BLACK WINS";
+				try {
+					winButler.put("win", MainMenu.username, winTitle);
+				} catch (InterruptedException e) {}
+				sbg.enterState(Client.WIN_SCREEN);
+			}
+			
+			try {
+				Object[] win = winButler.getp(new ActualField(MainMenu.username), new ActualField("win"), new FormalField(String.class));
+				if(win != null) {
+					System.out.println("got win");
+					winTitle = win[2].toString();
+					sbg.enterState(Client.WIN_SCREEN);
+				}
+			} catch (InterruptedException e1) {}
+			
+			
+			
 			if (player.getX() < 0) { player.setX(0); }
 			if (player.getX() >= WIDTH - player.getSize()) { player.setX(WIDTH - player.getSize()); }
 			
@@ -329,14 +375,12 @@ public class Game extends BasicGameState {
 				}
 			} catch (InterruptedException e) {}
 			
-			
-			
-			
 		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 			sbg.enterState(Client.PAUSE);
 		}
 		
+
 	}
 	
 	private void drawPlayers(Graphics g, GameContainer container) {

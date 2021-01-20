@@ -36,6 +36,7 @@ public class Client extends StateBasedGame {
 	public static final int GAME = 1;
 	public static final int PAUSE = 2;
 	public static final int LOBBY = 3;
+	public static final int WIN_SCREEN = 4;
 	
 	// App properties
 	public static final int FRAMES = 60;
@@ -83,7 +84,7 @@ public class Client extends StateBasedGame {
 		this.addState(new Game());
 		this.addState(new Pause());
 		this.addState(new Lobby());
-
+		this.addState(new WinScreen());
 	}
 
 }
