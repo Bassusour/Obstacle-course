@@ -14,7 +14,7 @@ import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 
 class Server {
-	public static final String IP = "25.74.68.220:9001";
+	public static final String IP = "127.0.0.1:9001";
 	public static HashMap<String, SequentialSpace> players = new HashMap<String, SequentialSpace>();
 	
 	//Main thread creates spaces and starts other threads
@@ -43,6 +43,7 @@ class Server {
 		new Thread(new PlayerController()).start();
 		new Thread(new ReadyController()).start();
 		new Thread(new PositionController()).start();
+		new Thread(new TrapController()).start();
 		
 		System.out.println("Created spaces");
 
@@ -52,6 +53,7 @@ class Server {
 class PlayerController implements Runnable {
 	
 	RemoteSpace playerButler;
+	RemoteSpace positionButler;
 	RemoteSpace ready;
 	Map<String, SequentialSpace> players;
 	
@@ -65,6 +67,7 @@ class PlayerController implements Runnable {
 		try {
 			playerButler = new RemoteSpace("tcp://" + Server.IP + "/playerButler?keep");
 			ready = new RemoteSpace("tcp://" + Server.IP + "/ready?keep");
+			positionButler = new RemoteSpace("tcp://" + Server.IP + "/positionButler?keep");
 			players = Server.players;
 		} catch (IOException e) {}
 		
@@ -102,6 +105,7 @@ class PlayerController implements Runnable {
 					players.remove(remove[0]);
 					ready.get(new ActualField(remove[0]), new FormalField(String.class));
 					ready.getp(new ActualField("all ready"), new FormalField(Integer.class));
+					positionButler.getAll(new ActualField(remove[0]), new FormalField(String.class), new FormalField(Float.class), new FormalField(Float.class));
 					for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
 						if(!entry.getKey().equals(remove[0])) {
 							playerButler.put(entry.getKey(), "remove other player", remove[0]);
@@ -240,7 +244,15 @@ class TrapController implements Runnable {
 		 
 		 
 		while (!false) {
-			
+			try {
+				Object[] trap = trapButler.get(new FormalField(String.class), new ActualField("trap triggered"), new FormalField(String.class), new FormalField(Integer.class));
+				for (Map.Entry<String, SequentialSpace> entry : players.entrySet()) {
+					if (!entry.getKey().equals(trap[0])) {
+						trapButler.put(entry.getKey(), "trigger trap", trap[2].toString(), (int) trap[3]);
+					}
+				}
+				
+			} catch (InterruptedException e) {}
 		}
 		
 	}

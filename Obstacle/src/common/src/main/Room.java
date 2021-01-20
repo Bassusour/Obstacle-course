@@ -8,20 +8,21 @@ public class Room {
 	private Player player;
 	private Path path;
 	private Teleporter[] teleporters;
+	private Button[] buttons;
 	
-	public static Circle[] PATH_ONE_PORTS = {
-			new Circle(350, 150, 15, 15),
-			new Circle(550, 50, 15, 15)
-	};
-	
-	public Room(Player player, Path path, Teleporter[] teleporters) {
+	public Room(Player player, Path path, Teleporter[] teleporters, Button[] buttons) {
 		this.player = player;
 		this.path = path;
 		this.teleporters = teleporters;
+		this.buttons = buttons;
 	}
 	
 	public Circle getTeleportElement(int i) {
 		return teleporters[i].getShape();
+	}
+	
+	public Rectangle getButtonElement(int i) {
+		return buttons[i].getShape();
 	}
 
 }

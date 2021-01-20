@@ -57,7 +57,6 @@ public class MainMenu extends BasicGameState {
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		font.drawString((userField.getX() - font.getWidth("Username: ")), userField.getY(), "Username: ");
 		findMatchButton = new Image("res/findButton.png");
-		createButton = new Image("res/createButton.png");
 		desktopButton = new Image("res/desktopButton.png");
 		g.drawImage(findMatchButton, (windowWidth / 2) - (findMatchButton.getWidth() / 2), 300);
 //		g.drawImage(createButton, (windowWidth/2)-(createButton.getWidth()/2), 400);
@@ -123,17 +122,6 @@ public class MainMenu extends BasicGameState {
 			} catch (InterruptedException e) { }
 		}
 
-	}
-
-	private void createClick(int posX, int posY, StateBasedGame sbg) {
-		if ((posX >= (windowWidth / 2) - (createButton.getWidth() / 2)
-				&& posX <= (windowWidth / 2) - (createButton.getWidth() / 2) + createButton.getWidth())
-				&& (posY >= 400 && posY <= 400 + createButton.getHeight())) {
-			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-				buttonClick.play();
-				sbg.enterState(Client.CREATE_MATCH);
-			}
-		}
 	}
 
 	private void desktopClick(int posX, int posY, GameContainer gc) {

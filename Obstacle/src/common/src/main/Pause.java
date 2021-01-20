@@ -47,7 +47,6 @@ public class Pause extends BasicGameState {
 		playerList = Client.playerList;
 		
 		resumeGameButton = new Image("res/resumeGameButton.png");
-		optionsButton = new Image("res/optionsButton.png");
 		mainMenuButton = new Image("res/mainMenuButton.png");
 		desktopButton = new Image("res/desktopButton.png");
 		buttonClick = new Sound("res/buttonClickSound.wav");
@@ -59,7 +58,6 @@ public class Pause extends BasicGameState {
 		windowWidth = gc.getWidth();
 		windowHeight = gc.getHeight();
 		g.drawImage(resumeGameButton, (windowWidth/2)-(resumeGameButton.getWidth()/2), 400);
-		g.drawImage(optionsButton, (windowWidth/2)-(optionsButton.getWidth()/2), 500);
 		g.drawImage(mainMenuButton, (windowWidth/2)-(mainMenuButton.getWidth()/2), 600);
 		g.drawImage(desktopButton, (windowWidth/2)-(desktopButton.getWidth()/2), 700);
 		
@@ -79,7 +77,6 @@ public class Pause extends BasicGameState {
 		int posY = input.getMouseY();
 	
 		resumeClick(posX, posY, sbg);
-		optionsClick(posX, posY, sbg);
 		mainMenuClick(posX, posY, sbg);
 		desktopClick(posX, posY, gc);
 		
@@ -93,15 +90,6 @@ public class Pause extends BasicGameState {
 			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
 				buttonClick.play();
 				sbg.enterState(Client.GAME);
-			}
-		}
-	}
-	
-	private void optionsClick(int posX, int posY, StateBasedGame sbg) {
-		if((posX >= (windowWidth/2)-(optionsButton.getWidth()/2) && posX <= (windowWidth/2)-(optionsButton.getWidth()/2) + optionsButton.getWidth()) && (posY >= 500 && posY <= 500 + optionsButton.getHeight())) {
-			if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-				buttonClick.play();
-				sbg.enterState(Client.MAIN_MENU);
 			}
 		}
 	}
