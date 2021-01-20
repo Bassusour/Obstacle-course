@@ -51,6 +51,7 @@ public class WinScreen extends BasicGameState {
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
+		g.setBackground(Color.black);
 		windowWidth = gc.getWidth();
 		windowHeight = gc.getHeight();
 		g.drawImage(mainMenuButton, (windowWidth/2)-(mainMenuButton.getWidth()/2), 600);

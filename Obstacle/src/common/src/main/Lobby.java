@@ -11,6 +11,7 @@ import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.jspace.SequentialSpace;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -75,6 +76,7 @@ public class Lobby extends BasicGameState {
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
+		g.setBackground(Color.black);
 		font.drawString( (windowWidth/2)-(width/2), 200,  lobbyTitle);
 		g.drawString(mouse, 10, 50);
 		font2.drawString(windowWidth/2-playerBox.getWidth()/2, 340, "Players joined");

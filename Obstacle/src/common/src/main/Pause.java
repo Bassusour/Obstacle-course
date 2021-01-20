@@ -54,6 +54,7 @@ public class Pause extends BasicGameState {
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
+		g.setBackground(Color.black);
 		String pauseTitle = "PAUSED";
 		windowWidth = gc.getWidth();
 		windowHeight = gc.getHeight();

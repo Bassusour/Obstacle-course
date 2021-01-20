@@ -13,9 +13,9 @@ public class Trap {
 	
 	private int size, X, Y;
 	private Button button;
-	private static Circle[] bombs = new Circle[10];
-	private static Circle[] superbombs = new Circle[10];
-	private static Circle[] bullets = new Circle[20];
+	static Bomb[] bombs = new Bomb[10];
+	static Bomb[] superbombs = new Bomb[10];
+	static Bomb[] bullets = new Bomb[20];
 	private static long spawntime;
 	
 	private static Random generator = new Random(987235907);
@@ -46,10 +46,10 @@ public class Trap {
 				int lowerboundY = button.trapY + 10;
 				int randomY = generator.nextInt(upperboundY - lowerboundY) + lowerboundY;
 				
-				bombs[i] = new Circle(randomX, randomY, 10);
+				bombs[i] = new Bomb(randomX, randomY, 10, Color.lightGray);
 				
 				for (int j = 0; j < i; j++) {
-					if (bombs[i].intersects(bombs[j])) {
+					if (bombs[i].getShape().intersects(bombs[j].getShape())) {
 						i--;
 						break;
 					}
@@ -65,20 +65,22 @@ public class Trap {
 			
 			for (int i = 0; i < (timeDifference / 250) % 10; i++) {
 				graphics.setColor(Color.lightGray);
-				graphics.fill(bombs[i]);
+				graphics.fill(bombs[i].getShape());
 			}
 			
 		} else {
 			
-			for (Circle bomb : bombs) {
+			for (Bomb bomb : bombs) {
 				
 				if (timeDifference < 3000) {
 					graphics.setColor(Color.lightGray);
 				} else {
 					graphics.setColor(Color.red);
+					bomb.setColor(Color.red);
 				}
-				graphics.fill(bomb);
-				
+
+				graphics.fill(bomb.getShape());
+
 			}	
 		}
 	}
@@ -116,10 +118,10 @@ public class Trap {
 					randomY = 1060;
 				}
 					
-				superbombs[i] = new Circle(randomX, randomY, 10);
+				superbombs[i] = new Bomb(randomX, randomY, 10, Color.lightGray);
 				
 				for (int j = 0; j < i; j++) {
-					if (superbombs[i].intersects(superbombs[j])) {
+					if (superbombs[i].getShape().intersects(superbombs[j].getShape())) {
 						i--;
 						break;
 					}
@@ -134,24 +136,25 @@ public class Trap {
 			
 			for (int i = 0; i < (timeDifference / 100) % 10; i++) {
 				graphics.setColor(Color.lightGray);
-				graphics.fill(superbombs[i]);
+				graphics.fill(superbombs[i].getShape());
 			}
 			
 		} else {
 			
-			for (Circle bomb : superbombs) {
+			for (Bomb bomb : superbombs) {
 				
 				if (timeDifference < 1000) {
 					graphics.setColor(Color.lightGray);
 				} else if (timeDifference < 1500) {
 					graphics.setColor(Color.red);
+					bomb.setColor(Color.red);
 				} else {
 					//int randomMovement = ThreadLocalRandom.current().nextInt(0);
 					bomb.setX(bomb.getX() - 7);
 				}
 				
 				if (bomb.getX() > 100) {
-					graphics.fill(bomb);
+					graphics.fill(bomb.getShape());
 				}
 				
 			}
@@ -172,7 +175,7 @@ public class Trap {
 				int upperboundX = button.trapX + 90;
 				int lowerboundX = button.trapX + 10;
 				int randomX = generator.nextInt(upperboundX - lowerboundX) + lowerboundX;
-				bullets[i] = new Circle(randomX, button.trapY, 5);
+				bullets[i] = new Bomb(randomX, button.trapY, 5, Color.red);
 			}
 			
 			button.unpressed();
@@ -184,7 +187,7 @@ public class Trap {
 			for (int i = 0; i < (timeDifference / 175) % 20; i++) {
 				
 				if (bullets[i].getY() < 700 || button.trapX == 1820) {
-					graphics.fill(bullets[i]);
+					graphics.fill(bullets[i].getShape());
 					bullets[i].setY(bullets[i].getY() + 20);
 				}
 				

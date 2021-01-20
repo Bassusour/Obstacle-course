@@ -55,6 +55,7 @@ public class MainMenu extends BasicGameState {
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
+		g.setBackground(Color.black);
 		font.drawString((userField.getX() - font.getWidth("Username: ")), userField.getY(), "Username: ");
 		findMatchButton = new Image("res/findButton.png");
 		desktopButton = new Image("res/desktopButton.png");
