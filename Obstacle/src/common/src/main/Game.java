@@ -28,6 +28,7 @@ public class Game extends BasicGameState {
 	
 	private RemoteSpace positionButler;
 	RemoteSpace playerButler;
+	RemoteSpace trapButler;
 
 	ArrayList<Player> playerList;
 	public static final int ID = 1;
@@ -35,6 +36,10 @@ public class Game extends BasicGameState {
 	
 	final static int WIDTH = 1920;
 	final static int HEIGHT = 1080;
+	
+	private boolean triggerTrap = false;
+	private int buttonID = -1;
+	private String trapType = "";
 	
 	private Player player;
 	private Path path;
@@ -54,7 +59,8 @@ public class Game extends BasicGameState {
 		gc.setAlwaysRender(true);
 		try {
 			positionButler = new RemoteSpace("tcp://" + Client.IP + "/positionButler?keep");
-			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");			
+			playerButler = new RemoteSpace("tcp://" + Client.IP + "/playerButler?keep");	
+			trapButler = new RemoteSpace("tcp://" + Client.IP + "/trapButler?keep");	
 		} catch (IOException e) { }
 		playerList = Client.playerList;
 		
@@ -145,20 +151,52 @@ public class Game extends BasicGameState {
 			if (button.isPressed() || button.inUse()) {
 				
 				if (i < 5) {
+					try {
+						if (button.isPressed()) { trapButler.put(MainMenu.username, "trap triggered", "bombs", button.getID()); }
+					} catch (InterruptedException e) {}
 					Trap.setBombs(graphics, time, button);
 				} else if (i < 8){
+					try {
+						if (button.isPressed()) { trapButler.put(MainMenu.username, "trap triggered", "bullets", button.getID()); }
+					} catch (InterruptedException e) {}
 					Trap.setBullets(graphics, time, button);
 				} else {
+					try {
+						if (button.isPressed()) { trapButler.put(MainMenu.username, "trap triggered", "super bombs", button.getID()); }
+					} catch (InterruptedException e) {}
 					Trap.setSuperbombs(graphics, time, button);
 				}
 				
-				button.unpressed();
+//				button.unpressed();
 				
 			}
+			
 		}
-	
 		
 		
+		if (triggerTrap) {
+			Button button = null;
+			for (Button butt : Button.PATH_ONE_BUTTONS) {
+				if (butt.getID() == buttonID) {
+					button = butt;
+					if (!(button.getCooldown() > System.currentTimeMillis())) {
+						button.pressed();
+						button.setCooldown(time + 10000);
+					}
+					if (trapType.equals("bombs")) {
+						Trap.setBombs(graphics, time, button);
+					} else if (trapType.equals("super bombs")) {
+						Trap.setSuperbombs(graphics, time, button);
+					} else {
+						Trap.setBullets(graphics, time, button);
+					}
+				}
+			}
+			if (!button.inUse()) {
+				triggerTrap = false;
+			}
+			
+		}	
 	}
 
 	@Override
@@ -308,12 +346,22 @@ public class Game extends BasicGameState {
 					}
 				}
 			}
+			
+			try {
+				Object[] trap = trapButler.getp(new ActualField(MainMenu.username), new ActualField("trigger trap"), new FormalField(String.class), new FormalField(Integer.class));
+				if ( trap != null ) {
+					buttonID = (int) trap[3];
+					trapType = trap[2].toString();
+					triggerTrap = true;
+				}
+			} catch (InterruptedException e) {}
+			
 		
 		if(input.isKeyPressed(Input.KEY_ESCAPE)) {
 			sbg.enterState(Client.PAUSE);
 		}
 		
-		//System.out.println("Game Player list: " + playerList.toString());
+
 	}
 	
 	private void drawPlayers(Graphics g, GameContainer container) {

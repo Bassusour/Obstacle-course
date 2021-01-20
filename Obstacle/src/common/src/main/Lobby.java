@@ -24,7 +24,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 public class Lobby extends BasicGameState {
 	
-	public static final int ID = 5;
+	public static final int ID = 3;
 	
 	String host;
 	
@@ -143,8 +143,6 @@ public class Lobby extends BasicGameState {
 		try {
 			allReady = ready.queryp(new ActualField("all ready"), new FormalField(Integer.class));
 		} catch (InterruptedException e) {}
-		
-		//System.out.println("Lobby Player list: " + playerList.toString());
 		
 		if(allReady != null) {
 			playerList.get((int) allReady[1]).setEnemy(true);
