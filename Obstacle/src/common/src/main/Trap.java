@@ -18,8 +18,6 @@ public class Trap {
 	private static Circle[] bullets = new Circle[20];
 	private static long spawntime;
 	
-	static RemoteSpace trapButler;
-	
 	public Trap(int size, int X, int Y, Button button) {
 		this.size = size;
 		this.X = X;
@@ -31,8 +29,6 @@ public class Trap {
 	public static void setBombs(Graphics graphics, long time, Button button) {
 		
 		if (button.isPressed()) {
-			
-			System.out.println("in button pressed");
 			
 			spawntime = time;
 			
@@ -66,13 +62,10 @@ public class Trap {
 			for (Circle bomb : bombs) {
 				
 				if (timeDifference < 3000) {
-					System.out.println("gray");
 					graphics.setColor(Color.lightGray);
 				} else {
-					System.out.println("red");
 					graphics.setColor(Color.red);
 				}
-				System.out.println("in else");
 				graphics.fill(bomb);
 				
 			}	
@@ -108,6 +101,7 @@ public class Trap {
 					}
 				}
 			}
+			button.unpressed();
 		} 
 		
 		long timeDifference = System.currentTimeMillis() - spawntime;
@@ -153,6 +147,8 @@ public class Trap {
 				int randomX = ThreadLocalRandom.current().nextInt(button.trapX + 10, button.trapX + 90);
 				bullets[i] = new Circle(randomX, button.trapY, 5);
 			}
+			
+			button.unpressed();
 			
 		} else {
 			
