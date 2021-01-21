@@ -150,10 +150,10 @@ public class Trap {
 					bomb.setColor(Color.red);
 				} else {
 					//int randomMovement = ThreadLocalRandom.current().nextInt(0);
-					bomb.setX(bomb.getX() - 7);
+					bomb.getShape().setX(bomb.getShape().getX() - 7);
 				}
 				
-				if (bomb.getX() > 100) {
+				if (bomb.getShape().getX() > 100) {
 					graphics.fill(bomb.getShape());
 				}
 				
@@ -186,9 +186,9 @@ public class Trap {
 			
 			for (int i = 0; i < (timeDifference / 175) % 20; i++) {
 				
-				if (bullets[i].getY() < 700 || button.trapX == 1820) {
+				if (bullets[i].getShape().getY() < 700 || button.trapX == 1820) {
 					graphics.fill(bullets[i].getShape());
-					bullets[i].setY(bullets[i].getY() + 20);
+					bullets[i].getShape().setY(bullets[i].getShape().getY() + 20);
 				}
 				
 			}
